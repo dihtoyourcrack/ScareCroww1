@@ -21,6 +21,7 @@ export default function EscrowDetailPage() {
   const { requestRefund, isLoading: isRefunding, error: refundError } = useRequestRefund();
   const [targetChain, setTargetChain] = useState(8453); // Base mainnet by default
   const [escrow, setEscrow] = useState<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const [releaseTxStatus, setReleaseTxStatus] = useState<{
     status: "idle" | "pending" | "success" | "error";
     message?: string;
@@ -30,6 +31,11 @@ export default function EscrowDetailPage() {
     message?: string;
   }>({ status: "idle" });
   const [showSignatureModal, setShowSignatureModal] = useState(false);
+
+  // Fix hydration error by ensuring client-side only rendering
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Check for demo escrows first
   useEffect(() => {
@@ -59,7 +65,7 @@ export default function EscrowDetailPage() {
     }
   }, [escrowId, onChainEscrow]);
 
-  if (isLoading) {
+  if (!isMounted || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background text-gray-900">
         <LoadingSpinner />

@@ -2,52 +2,73 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import LightRays from "@/components/ui/LightRays";
 
 export default function DocsPage() {
   const [activeTab, setActiveTab] = useState<"overview" | "technical" | "user">("overview");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
-      <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      {/* LightRays Background */}
+      <div className="fixed inset-0 z-0">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#6366f1"
+          raysSpeed={0.5}
+          lightSpread={0.8}
+          rayLength={3}
+          followMouse={true}
+          mouseInfluence={0.15}
+          noiseAmount={0.1}
+          distortion={0.2}
+          fadeDistance={1.2}
+          saturation={1.1}
+        />
+      </div>
+      
+      {/* Dark overlay for text readability */}
+      <div className="fixed inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/60 z-[1] pointer-events-none" />
+      
+      <div className="max-w-6xl mx-auto px-4 py-12 relative z-10">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="text-blue-400 hover:text-blue-300 mb-4 inline-block">
+          <Link href="/" className="text-blue-400 hover:text-blue-300 mb-4 inline-block drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
             ← Back to Home
           </Link>
-          <h1 className="text-5xl font-bold mb-4">RealSlimShady Documentation</h1>
-          <p className="text-xl text-gray-300">
+          <h1 className="text-5xl font-bold mb-4 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">RealSlimShady Documentation</h1>
+          <p className="text-xl text-gray-200 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
             Everything you need to know about our secure escrow platform
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex gap-4 mb-8 border-b border-gray-700">
+        <div className="flex gap-4 mb-8 border-b border-white/20">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-6 py-3 font-semibold transition-colors ${
+            className={`px-6 py-3 font-semibold transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
               activeTab === "overview"
                 ? "border-b-2 border-blue-500 text-blue-400"
-                : "text-gray-400 hover:text-white"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             Overview
           </button>
           <button
             onClick={() => setActiveTab("user")}
-            className={`px-6 py-3 font-semibold transition-colors ${
+            className={`px-6 py-3 font-semibold transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
               activeTab === "user"
                 ? "border-b-2 border-blue-500 text-blue-400"
-                : "text-gray-400 hover:text-white"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             User Guide
           </button>
           <button
             onClick={() => setActiveTab("technical")}
-            className={`px-6 py-3 font-semibold transition-colors ${
+            className={`px-6 py-3 font-semibold transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] ${
               activeTab === "technical"
                 ? "border-b-2 border-blue-500 text-blue-400"
-                : "text-gray-400 hover:text-white"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             Technical Guide
@@ -55,7 +76,7 @@ export default function DocsPage() {
         </div>
 
         {/* Content */}
-        <div className="bg-gray-800 rounded-lg p-8">
+        <div className="bg-black/60 backdrop-blur-sm rounded-lg p-8 border border-white/10 shadow-2xl">
           {activeTab === "overview" && (
             <div className="space-y-8">
               <section>
