@@ -28,5 +28,8 @@
     "viem": "^1.20.0",
     "wagmi": "^1.4.0",
     "zustand": "^4.4.6"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.1.3"
   }
 }
