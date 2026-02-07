@@ -5,6 +5,12 @@ export const CHAINS = {
     rpc: "https://mainnet.base.org",
     explorer: "https://basescan.org",
   },
+  BASE_SEPOLIA: {
+    id: 84532,
+    name: "Base Sepolia",
+    rpc: "https://sepolia.base.org",
+    explorer: "https://sepolia.basescan.org",
+  },
   ETHEREUM: {
     id: 1,
     name: "Ethereum",
@@ -36,7 +42,8 @@ export const TOKENS = {
     symbol: "USDC",
     decimals: 6,
     address: {
-      [CHAINS.BASE.id]: "0xd9aAEc860b8A838435ACCCF6c7cced4f7f1CBD1f",
+      [CHAINS.BASE.id]: "0x833589fcd6edb6e08f4c7c32d4f71b1566469c18", // Base Mainnet
+      [CHAINS.BASE_SEPOLIA.id]: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", // Base Sepolia
     },
   },
   USDT: {

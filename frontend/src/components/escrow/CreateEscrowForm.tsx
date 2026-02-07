@@ -17,7 +17,7 @@ import {
 } from "@/lib/demo";
 
 const TOKEN_LIST = [
-  { symbol: "USDC", address: "0x833589fcd6edb6e08f4c7c32d4f71b1566469c18", decimals: 6 },
+  { symbol: "USDC", address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", decimals: 6 }, // Base Sepolia USDC
   { symbol: "ETH", address: "0x0000000000000000000000000000000000000000", decimals: 18 },
 ];
 
