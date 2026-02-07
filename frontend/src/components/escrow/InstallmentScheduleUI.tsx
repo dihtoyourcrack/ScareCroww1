@@ -92,7 +92,7 @@ export function InstallmentScheduleUI({
           action: "installment_release",
           actor: userAddress,
           txHash: fakeTx,
-          reason: `Installment #${nextInstallment.index} released successfully (Demo Mode)`,
+          reason: `Installment #${nextInstallment.index} released successfully`,
           meta: {
             installmentIndex: nextInstallment.index,
             amount: nextInstallment.amount,

@@ -58,9 +58,9 @@ export default function FreelancerRetrievePage() {
 
   const handleClaim = async (escrow: any) => {
     if (isDemoMode()) {
-      // Demo mode - instant claim without signatures
+      // Instant claim without signatures
       if (isEscrowClaimed(escrow.id)) {
-        alert('This escrow has already been claimed in demo mode!');
+        alert('This escrow has already been claimed!');
         return;
       }
       
@@ -71,7 +71,7 @@ export default function FreelancerRetrievePage() {
         escrow.tokenAddress
       );
       markEscrowAsClaimed(escrow.id);
-      alert(`✅ Demo claim successful! ${escrow.amount} tokens added to your wallet.`);
+      alert(`Claim successful! ${escrow.amount} tokens added to your wallet.`);
       return;
     }
     
@@ -131,11 +131,7 @@ export default function FreelancerRetrievePage() {
           <p className="text-lg text-slate-600">
             Request client-signed releases for your active escrows
           </p>
-          {isDemoMode() && (
-            <div className="mt-4 inline-block px-4 py-2 bg-amber-100 text-amber-800 rounded-lg text-sm font-medium">
-              🎭 Demo Mode Active
-            </div>
-          )}
+
         </div>
 
         {isLoading ? (

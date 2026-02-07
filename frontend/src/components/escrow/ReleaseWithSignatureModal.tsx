@@ -189,7 +189,7 @@ export function ReleaseWithSignatureModal({
                 onChange={(e) => setManualMode(e.target.checked)}
                 className="w-4 h-4 text-sky-600 rounded focus:ring-2 focus:ring-sky-500"
               />
-              <span className="text-sm text-slate-700">Demo / Manual signature mode</span>
+              <span className="text-sm text-slate-700">Manual signature mode</span>
             </label>
           </div>
 
