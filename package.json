@@ -1,0 +1,26 @@
+{
+  "name": "crosschain-escrow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cross-chain freelance escrow platform with installment support",
+  "scripts": {
+    "dev": "pnpm --filter @crosschain-escrow/frontend dev",
+    "build": "pnpm -r build",
+    "compile": "pnpm --filter @crosschain-escrow/contracts compile",
+    "deploy": "pnpm --filter @crosschain-escrow/contracts deploy",
+    "test": "pnpm --filter @crosschain-escrow/contracts test",
+    "clean": "pnpm -r clean && rm -rf node_modules"
+  },
+  "keywords": [
+    "escrow",
+    "cross-chain",
+    "freelance",
+    "blockchain",
+    "ethereum"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
