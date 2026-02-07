@@ -102,15 +102,18 @@ export const ScrollVelocity = ({
 
     const directionFactor = useRef(1);
     useAnimationFrame((t, delta) => {
+      const vf: any = velocityFactor as any;
+      const vfVal = typeof vf.get === 'function' ? vf.get() : (vf as any)();
+
       let moveBy = directionFactor.current * baseVelocity * (delta / 1000);
 
-      if (velocityFactor.get() < 0) {
+      if (vfVal < 0) {
         directionFactor.current = -1;
-      } else if (velocityFactor.get() > 0) {
+      } else if (vfVal > 0) {
         directionFactor.current = 1;
       }
 
-      moveBy += directionFactor.current * moveBy * velocityFactor.get();
+      moveBy += directionFactor.current * moveBy * (vfVal || 0);
       baseX.set(baseX.get() + moveBy);
     });
 
