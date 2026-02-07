@@ -265,85 +265,112 @@ export default function EscrowDetailPage() {
 
             {!released && !refunded && !hasInstallments && (
               <div className="space-y-6">
+                {/* Check if escrow is funded first */}
+                {!funded && (
+                  <div className="bg-warning/10 border border-warning/20 rounded-xl p-4">
+                    <p className="text-warning font-medium">⚠️ Escrow must be funded before you can release funds</p>
+                    <p className="text-warning/80 text-sm mt-2">Complete the deposit step first</p>
+                  </div>
+                )}
+
                 {/* Release with Signature */}
-                <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl p-6 border border-sky-200">
-                  <h3 className="font-semibold mb-2 text-gray-900">💳 Client-Signed Release</h3>
-                  <p className="text-sm text-slate-600 mb-4">
-                    Sign a release authorization that allows the freelancer to claim funds on-chain
-                  </p>
-                  <button
-                    onClick={() => setShowSignatureModal(true)}
-                    className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
-                  >
-                    🔏 Sign Release Authorization
-                  </button>
-                </div>
+                {funded && (
+                  <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl p-6 border border-sky-200">
+                    <h3 className="font-semibold mb-2 text-gray-900">💳 Client-Signed Release</h3>
+                    <p className="text-sm text-slate-600 mb-4">
+                      Sign a release authorization that allows the freelancer to claim funds on-chain
+                    </p>
+                    <button
+                      onClick={() => setShowSignatureModal(true)}
+                      className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
+                    >
+                      🔏 Sign Release Authorization
+                    </button>
+                  </div>
+                )}
 
                 {/* Release Funds */}
-                <div className="bg-background rounded-xl p-6">
-                  <h3 className="font-semibold mb-4 text-gray-900">Release Full Payment</h3>
+                {funded && (
+                  <div className="bg-background rounded-xl p-6">
+                    <h3 className="font-semibold mb-4 text-gray-900">Release Full Payment</h3>
 
-                  {releaseTxStatus.status !== "idle" && (
-                    <div
-                      className={`rounded-xl p-4 mb-4 text-sm font-medium ${
-                        releaseTxStatus.status === "pending"
-                          ? "bg-info/10 border border-info/20 text-info"
-                          : releaseTxStatus.status === "success"
-                          ? "bg-success/10 border border-success/20 text-success"
-                          : "bg-danger/10 border border-danger/20 text-danger"
-                      }`}
+                    {releaseTxStatus.status !== "idle" && (
+                      <div
+                        className={`rounded-xl p-4 mb-4 text-sm font-medium ${
+                          releaseTxStatus.status === "pending"
+                            ? "bg-info/10 border border-info/20 text-info"
+                            : releaseTxStatus.status === "success"
+                            ? "bg-success/10 border border-success/20 text-success"
+                            : "bg-danger/10 border border-danger/20 text-danger"
+                        }`}
+                      >
+                        {releaseTxStatus.message}
+                      </div>
+                    )}
+
+                    {releaseError && (
+                      <div className="bg-danger/10 border border-danger/20 rounded-xl p-4 mb-4 text-sm text-danger font-medium">
+                        {String(releaseError).includes("Already released") ? (
+                          <>
+                            <p className="font-semibold">✓ This escrow has already been released!</p>
+                            <p className="text-sm mt-1">Refresh the page to see the updated status.</p>
+                            <button
+                              onClick={() => window.location.reload()}
+                              className="mt-3 px-4 py-2 bg-success text-white rounded-lg hover:bg-success/90 transition-colors text-sm font-medium"
+                            >
+                              🔄 Refresh Page
+                            </button>
+                          </>
+                        ) : (
+                          releaseError instanceof Error ? releaseError.message : String(releaseError)
+                        )}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleRelease}
+                      disabled={isReleasing || releaseTxStatus.status === "pending"}
+                      className="w-full bg-success hover:bg-success/90 disabled:bg-muted disabled:opacity-50 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
                     >
-                      {releaseTxStatus.message}
-                    </div>
-                  )}
+                      {isReleasing || releaseTxStatus.status === "pending"
+                        ? "⏳ Processing..."
+                        : "✓ Release $" + formattedAmount + " to Freelancer"}
+                    </button>
 
-                  {releaseError && (
-                    <div className="bg-danger/10 border border-danger/20 rounded-xl p-4 mb-4 text-sm text-danger font-medium">
-                      {releaseError instanceof Error ? releaseError.message : String(releaseError)}
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleRelease}
-                    disabled={isReleasing || releaseTxStatus.status === "pending"}
-                    className="w-full bg-success hover:bg-success/90 disabled:bg-muted disabled:opacity-50 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
-                  >
-                    {isReleasing || releaseTxStatus.status === "pending"
-                      ? "⏳ Processing..."
-                      : "✓ Release ${formattedAmount} to Freelancer"}
-                  </button>
-
-                  <p className="text-muted text-sm mt-3">
-                    💡 Once released, funds will be securely transferred to the freelancer's wallet on Base Sepolia
-                  </p>
-                </div>
+                    <p className="text-muted text-sm mt-3">
+                      💡 Once released, funds will be securely transferred to the freelancer's wallet on Base Sepolia
+                    </p>
+                  </div>
+                )}
 
                 {/* Bridge to Destination */}
-                <div className="bg-background rounded-xl p-6">
-                  <h3 className="font-semibold mb-4 text-gray-900">Bridge to Destination Chain</h3>
+                {funded && (
+                  <div className="bg-background rounded-xl p-6">
+                    <h3 className="font-semibold mb-4 text-gray-900">Bridge to Destination Chain</h3>
 
-                  <div className="mb-4">
-                    <label className="block text-sm text-gray-900 mb-2 font-medium">Select Destination Chain</label>
-                    <select
-                      value={targetChain}
-                      onChange={(e) => setTargetChain(parseInt(e.target.value))}
-                      className="w-full bg-white text-gray-900 px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary-light outline-none transition-all"
-                    >
-                      <option value={8453}>Base</option>
-                      <option value={1}>Ethereum</option>
-                      <option value={137}>Polygon</option>
-                      <option value={42161}>Arbitrum</option>
-                      <option value={10}>Optimism</option>
-                    </select>
+                    <div className="mb-4">
+                      <label className="block text-sm text-gray-900 mb-2 font-medium">Select Destination Chain</label>
+                      <select
+                        value={targetChain}
+                        onChange={(e) => setTargetChain(parseInt(e.target.value))}
+                        className="w-full bg-white text-gray-900 px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary-light outline-none transition-all"
+                      >
+                        <option value={8453}>Base</option>
+                        <option value={1}>Ethereum</option>
+                        <option value={137}>Polygon</option>
+                        <option value={42161}>Arbitrum</option>
+                        <option value={10}>Optimism</option>
+                      </select>
+                    </div>
+
+                    <ReleaseAndBridgeButton
+                      escrowId={escrowId}
+                      freelancerAddress={freelancer}
+                      amount={formattedAmount}
+                      fromChainId={targetChain}
+                    />
                   </div>
-
-                  <ReleaseAndBridgeButton
-                    escrowId={escrowId}
-                    freelancerAddress={freelancer}
-                    amount={formattedAmount}
-                    fromChainId={targetChain}
-                  />
-                </div>
+                )}
 
                 {/* Request Refund */}
                 {daysUntilRefund === 0 && (

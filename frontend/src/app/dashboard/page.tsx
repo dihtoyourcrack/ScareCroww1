@@ -7,10 +7,12 @@ import { useAllEscrows } from "@/hooks/useAllEscrows";
 import { formatUnits } from "viem";
 import { ESCROW_ADDRESS } from "@/lib/contracts";
 import { getDemoEscrows, isDemoMode } from "@/lib/demo";
+import { TransactionLogViewer } from "@/components/escrow/TransactionLogViewer";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const [isMounted, setIsMounted] = useState(false);
+  const [expandedEscrow, setExpandedEscrow] = useState<number | null>(null);
   const { escrows, isLoading } = useAllEscrows();
 
   useEffect(() => {
@@ -34,17 +36,15 @@ export default function DashboardPage() {
       e.freelancer?.toLowerCase() === address?.toLowerCase()
   );
 
-  // Filter escrows relevant to current user (only funded escrows)
+  // Filter escrows relevant to current user - SHOW ALL (funded and unfunded)
   const allUserEscrows = escrows.filter(
     (e) => 
       e.client?.toLowerCase() === address?.toLowerCase() ||
       e.freelancer?.toLowerCase() === address?.toLowerCase()
   );
 
-  // Only show funded escrows in dashboard (filter out $0 and unfunded)
-  const onChainUserEscrows = allUserEscrows.filter(
-    (e) => e.funded && e.amount && BigInt(e.amount) > 0n
-  );
+  // Show ALL escrows in dashboard (including unfunded ones)
+  const onChainUserEscrows = allUserEscrows; // No filter - show everything
 
   // Merge demo escrows with on-chain escrows (demo first for visibility)
   const userEscrows = [...demoUserEscrows, ...onChainUserEscrows];
@@ -159,66 +159,83 @@ export default function DashboardPage() {
                 </details>
               </div>
             ) : (
-              <div className="bg-gray-800 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-700">
-                    <tr>
-                      <th className="px-6 py-4 text-left font-semibold">ID</th>
-                      <th className="px-6 py-4 text-left font-semibold">Role</th>
-                      <th className="px-6 py-4 text-left font-semibold">Amount</th>
-                      <th className="px-6 py-4 text-left font-semibold">Status</th>
-                      <th className="px-6 py-4 text-left font-semibold">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-700">
-                    {userEscrows.map((escrow) => {
-                      const isClient = escrow.client?.toLowerCase() === address?.toLowerCase();
-                      const isDemo = !!(escrow as any).isDemo;
-                      const statusColors: Record<string, string> = {
-                        Created: "bg-yellow-900 text-yellow-200",
-                        Deposited: "bg-blue-900 text-blue-200",
-                        Released: "bg-green-900 text-green-200",
-                        Refunded: "bg-red-900 text-red-200",
-                      };
+              <div className="space-y-4">
+                {userEscrows.map((escrow) => {
+                  const isClient = escrow.client?.toLowerCase() === address?.toLowerCase();
+                  const isDemo = !!(escrow as any).isDemo;
+                  const statusColors: Record<string, string> = {
+                    Created: "bg-yellow-900 text-yellow-200",
+                    Deposited: "bg-blue-900 text-blue-200",
+                    Released: "bg-green-900 text-green-200",
+                    Refunded: "bg-red-900 text-red-200",
+                  };
+                  const statusClass = statusColors[(escrow.status as string) || ""] || 'bg-gray-900 text-gray-200';
+                  const isExpanded = expandedEscrow === escrow.id;
 
-                      const statusClass = statusColors[(escrow.status as string) || ""] || 'bg-gray-900 text-gray-200';
-
-                      return (
-                        <tr key={escrow.id} className="hover:bg-gray-750">
-                          <td className="px-6 py-4 font-mono">
-                            #{escrow.id}
+                  return (
+                    <div key={escrow.id} className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+                      {/* Escrow Summary Row */}
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-4">
+                            <span className="text-2xl font-bold text-white font-mono">#{escrow.id}</span>
                             {isDemo && (
-                              <span className="ml-2 text-xs text-blue-400 opacity-60">demo</span>
+                              <span className="px-2 py-1 bg-blue-900 text-blue-300 text-xs rounded font-semibold">DEMO</span>
                             )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${isClient ? 'bg-purple-900 text-purple-200' : 'bg-indigo-900 text-indigo-200'}`}>
-                              {isClient ? "Client" : "Freelancer"}
+                            <span className={`px-3 py-1 rounded text-xs font-semibold ${isClient ? 'bg-purple-900 text-purple-200' : 'bg-indigo-900 text-indigo-200'}`}>
+                              {isClient ? "👤 Client" : "💼 Freelancer"}
                             </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            {escrow.amount 
-                              ? `$${parseFloat(formatUnits(BigInt(escrow.amount), 6)).toFixed(2)}` 
-                              : "-"}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${statusClass}`}>
+                            <span className={`px-3 py-1 rounded text-xs font-semibold ${statusClass}`}>
                               {escrow.status}
                             </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <Link
-                              href={`/escrow/${escrow.id}`}
-                              className="text-blue-400 hover:text-blue-300 underline text-sm"
-                            >
-                              View Details →
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-3xl font-bold text-white">
+                              {escrow.amount 
+                                ? `$${parseFloat(formatUnits(BigInt(escrow.amount), 6)).toFixed(2)}` 
+                                : "$0.00"}
+                            </div>
+                            <div className="text-sm text-gray-400">USDC</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <div className="text-xs text-gray-400 uppercase mb-1">Client</div>
+                            <div className="text-sm text-gray-300 font-mono">{escrow.client?.slice(0, 10)}...{escrow.client?.slice(-8)}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-400 uppercase mb-1">Freelancer</div>
+                            <div className="text-sm text-gray-300 font-mono">{escrow.freelancer?.slice(0, 10)}...{escrow.freelancer?.slice(-8)}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Link
+                            href={`/escrow/${escrow.id}`}
+                            className="flex-1 text-center bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white font-semibold transition text-sm"
+                          >
+                            View Full Details →
+                          </Link>
+                          <button
+                            onClick={() => setExpandedEscrow(isExpanded ? null : escrow.id)}
+                            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold transition"
+                          >
+                            {isExpanded ? "Hide" : "Show"} Transaction Logs
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Transaction Logs Section */}
+                      {isExpanded && (
+                        <div className="border-t border-gray-700 bg-gray-900 p-6">
+                          <h3 className="text-lg font-semibold text-white mb-4">📜 Transaction History</h3>
+                          <TransactionLogViewer escrowId={String(escrow.id)} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>
