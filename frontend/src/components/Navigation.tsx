@@ -53,7 +53,7 @@ export function Navigation() {
           {/* Logo/Brand */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold text-white">
+              <span className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text">
                 RealSlimShady
               </span>
             </Link>
