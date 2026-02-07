@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 export const SUPPORTED_CHAINS = [
-  { id: 84531, name: "Base Sepolia", testnet: true },
+  { id: 84532, name: "Base Sepolia", testnet: true },
   { id: 1, name: "Ethereum", testnet: false },
   { id: 137, name: "Polygon", testnet: false },
   { id: 56, name: "BSC", testnet: false },

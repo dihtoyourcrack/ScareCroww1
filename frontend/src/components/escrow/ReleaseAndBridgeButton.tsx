@@ -55,7 +55,7 @@ export const ReleaseAndBridgeButton = ({
       const amountInSmallestUnit = parseUnits(amount, 6).toString();
 
       await bridgeUSDC({
-        fromChain: 84531, // Base Sepolia (where contract is deployed)
+        fromChain: 84532, // Base Sepolia (where contract is deployed)
         toChain: fromChainId, // User selected chain
         amount: amountInSmallestUnit,
         fromAddress: freelancerAddress,

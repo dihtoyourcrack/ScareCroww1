@@ -19,6 +19,7 @@ interface Escrow {
 export const useAllEscrows = () => {
   const [escrows, setEscrows] = useState<Escrow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [blockNumber, setBlockNumber] = useState<bigint>(0n);
   const publicClient = usePublicClient();
 
   // Get the total count of escrows
@@ -28,6 +29,22 @@ export const useAllEscrows = () => {
     functionName: "escrowCount",
     watch: true, // Watch for changes
   });
+
+  // Watch for new blocks to trigger refresh when escrows are updated
+  useEffect(() => {
+    if (!publicClient) return;
+
+    const unwatch = publicClient.watchBlockNumber({
+      onBlockNumber: (newBlockNumber) => {
+        setBlockNumber(newBlockNumber);
+      },
+      emitOnBegin: true,
+      poll: true,
+      pollingInterval: 4000, // Poll every 4 seconds
+    });
+
+    return () => unwatch();
+  }, [publicClient]);
 
   useEffect(() => {
     const fetchAllEscrows = async () => {
@@ -97,7 +114,7 @@ export const useAllEscrows = () => {
     };
 
     fetchAllEscrows();
-  }, [publicClient, escrowCount]);
+  }, [publicClient, escrowCount, blockNumber]); // Added blockNumber to trigger refresh on new blocks
 
   return { escrows, isLoading };
 };

@@ -169,9 +169,10 @@ export default function FreelancerRetrievePage() {
           <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               {freelancerEscrows.map((escrow: any) => {
-                const usdcAmountBigInt: bigint = typeof escrow.usdcAmount === 'bigint' 
-                  ? escrow.usdcAmount 
-                  : BigInt(Number(escrow.usdcAmount) || 0);
+                // Get amount - handle both on-chain escrows (amount as string) and demo escrows (usdcAmount as bigint)
+                const usdcAmountBigInt: bigint = escrow.usdcAmount 
+                  ? (typeof escrow.usdcAmount === 'bigint' ? escrow.usdcAmount : BigInt(escrow.usdcAmount))
+                  : (escrow.amount ? BigInt(escrow.amount) : BigInt(0));
                 const paidAmountBigInt: bigint = typeof escrow.paidAmount === 'bigint' 
                   ? escrow.paidAmount 
                   : BigInt(Number(escrow.paidAmount) || 0);
