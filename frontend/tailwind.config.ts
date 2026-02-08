@@ -10,6 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // legacy fallbacks kept for non-CSS-var consumers
         primary: {
           DEFAULT: "#2563EB",
           hover: "#1D4ED8",
@@ -23,6 +24,12 @@ const config: Config = {
         card: "#FFFFFF",
         border: "#E5E7EB",
         muted: "#64748B",
+        // new CSS-variable driven tokens (context-aware)
+        accent: 'var(--accent, #06b6d4)',
+        text: 'var(--text, #000000)',
+        'muted-text': 'var(--muted, #64748B)',
+        surface: 'var(--surface, #ffffff)',
+        'page-bg': 'var(--bg, #FFFFFF)'
       },
       borderRadius: {
         xl: "12px",

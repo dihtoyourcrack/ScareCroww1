@@ -20,6 +20,30 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Theme variables: context-aware defaults (light by default). */
+:root {
+  --text:  #000000;
+  --muted: #64748B;
+  --accent: #06b6d4; /* cyan */
+  --bg:    #ffffff;
+  --surface: #ffffff;
+}
+
+/* Dark theme override: add `dark-theme` class on <html> or <body> to switch */
+.dark-theme {
+  --text:  #ffffff;
+  --muted: #94a3b8;
+  --accent: #7c3aed; /* violet accent */
+  --bg:    #041124; /* deep navy */
+  --surface: rgba(6,8,16,0.6);
+}
+
+/* apply context-aware text/background globally; components may override */
+body {
+  color: var(--text);
+  background-color: var(--bg);
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -78,5 +102,18 @@ button {
 
 .pixelated-bg {
   animation: pixelate 4s ease-in-out infinite;
+}
+
+/* small helper for when a component wants to use the context-driven text color */
+.text-context {
+  color: var(--text) !important;
+}
+
+.muted-context {
+  color: var(--muted) !important;
+}
+
+.accent-bg {
+  background-color: var(--accent) !important;
 }
 
