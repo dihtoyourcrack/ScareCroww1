@@ -85,6 +85,26 @@ export default function CreateEscrowForm() {
     }
   }, [createError]);
 
+  // Watch for deposit errors
+  useEffect(() => {
+    if (depositError) {
+      const errorMsg = depositError.message || depositError.toString();
+      if (errorMsg.toLowerCase().includes("already funded")) {
+        setSubmitError("This escrow has already been funded. Create a new escrow to proceed.");
+        setTxStatus({
+          status: "error",
+          message: "❌ Escrow already funded. Please create a new one.",
+        });
+      } else {
+        setSubmitError(errorMsg);
+        setTxStatus({
+          status: "error",
+          message: `❌ Error: ${errorMsg}`,
+        });
+      }
+    }
+  }, [depositError]);
+
   // Watch for approval completion
   useEffect(() => {
     if (approveHash && !isApproved) {
@@ -108,6 +128,20 @@ export default function CreateEscrowForm() {
       setTimeout(() => setStep("deposit"), 2000);
     }
   }, [escrowId, isCreating, step]);
+
+  const resetForm = () => {
+    setFreelancerInput("");
+    setFreelancerAddress("");
+    setAmount("");
+    setInstallments("1");
+    setMessage("");
+    setSubmitError(null);
+    setStep("create");
+    setEscrowId(null);
+    setMessageCID(null);
+    setIsApproved(false);
+    setTxStatus({ status: "idle" });
+  };
 
   const handleResolveENS = async () => {
     if (!freelancerInput.trim()) {
@@ -294,11 +328,21 @@ export default function CreateEscrowForm() {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to deposit funds";
       console.error("❌ Deposit error:", errorMsg);
-      setSubmitError(errorMsg);
-      setTxStatus({
-        status: "error",
-        message: `Error: ${errorMsg}`,
-      });
+      
+      // Check if the error is "Already funded"
+      if (errorMsg.toLowerCase().includes("already funded")) {
+        setSubmitError("This escrow has already been funded. Please create a new escrow to deposit funds.");
+        setTxStatus({
+          status: "error",
+          message: "❌ This escrow is already funded. Create a new one to proceed.",
+        });
+      } else {
+        setSubmitError(errorMsg);
+        setTxStatus({
+          status: "error",
+          message: `❌ Error: ${errorMsg}`,
+        });
+      }
     }
   };
 
@@ -570,13 +614,24 @@ export default function CreateEscrowForm() {
               : `Step 2: Deposit ${amount} ${token.symbol}`}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setStep("create")}
-            className="w-full bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded-lg text-sm"
-          >
-            Back
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setStep("create")}
+              className="flex-1 bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded-lg text-sm transition"
+            >
+              Back
+            </button>
+            {submitError?.includes("already funded") || submitError?.includes("Already funded") ? (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition"
+              >
+                Create New Escrow
+              </button>
+            ) : null}
+          </div>
         </form>
       )}
     </div>
