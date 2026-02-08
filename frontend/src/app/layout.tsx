@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
 import { ReactNode } from "react";
+import PageTransition from "@/components/ui/PageTransition";
 import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
@@ -46,7 +47,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <RainbowKitProvider chains={chains}>
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
               <Navigation />
-              <main>{children}</main>
+              <main>
+                <PageTransition>{children}</PageTransition>
+              </main>
             </div>
           </RainbowKitProvider>
         </WagmiConfig>
