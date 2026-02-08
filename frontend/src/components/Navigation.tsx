@@ -3,102 +3,89 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { isDemoMode, clearDemoData } from "@/lib/demo";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function Navigation() {
-  const pathname = usePathname();
-  const [showDemoBanner, setShowDemoBanner] = useState(false);
-
-  useEffect(() => {
-    setShowDemoBanner(isDemoMode());
-  }, []);
+  const pathname = usePathname() || "/";
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard", label: "Launch App" },
     { href: "/freelancer", label: "Freelancer Portal" },
     { href: "/freelancer/retrieve", label: "Claim Funds" },
-    { href: "/docs", label: "Documentation" },
+    { href: "/docs", label: "Documentation" }
   ];
 
-  const isActive = (path: string) => pathname === path;
-
-  const handleResetDemo = () => {
-    if (confirm('Reset all demo data? This will clear wallet balances and claimed escrows.')) {
-      clearDemoData();
-      window.location.reload();
-    }
-  };
+  const isActive = (href: string) => pathname === href;
 
   return (
-    <nav className="bg-gray-900 border-b border-gray-800">
-      {showDemoBanner && (
-        <div className="bg-blue-900/50 border-b border-blue-700/50 px-4 py-2">
-          <div className="flex items-center justify-between max-w-7xl mx-auto">
-            <span className="text-sm text-blue-200">
-              Testing environment active
-            </span>
+    <div className="fixed top-4 left-0 right-0 z-50 pointer-events-auto">
+      <div className="max-w-7xl mx-auto px-4">
+        <nav className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center">
+              <span className="text-lg font-extrabold text-text">RealSlimShady</span>
+            </Link>
+
+            <div className="hidden md:flex items-center bg-surface/80 backdrop-blur-sm rounded-full px-2 py-1 gap-1">
+              <ul className="flex items-center gap-1">{
+                navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+                        isActive(link.href) ? 'bg-accent text-white' : 'text-text/80 hover:bg-surface/60'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))
+              }</ul>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block">
+              <ConnectButton />
+            </div>
+
             <button
-              onClick={handleResetDemo}
-              className="text-xs px-3 py-1 bg-blue-800/50 hover:bg-blue-800 text-blue-100 rounded border border-blue-600/50 transition-colors"
+              className="md:hidden p-2 rounded-full bg-surface/80"
+              onClick={() => setMobileOpen((s) => !s)}
+              aria-label="Toggle menu"
             >
-              Reset Data
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
-        </div>
-      )}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text">
-                RealSlimShady
-              </span>
-            </Link>
-          </div>
+        </nav>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(link.href)
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:text-white hover:bg-gray-800"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+        {mobileOpen && (
+          <div className="md:hidden mt-2 bg-surface/90 rounded-lg p-2 shadow-sm">
+            <ul className="flex flex-col gap-2">
+              {navLinks.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive(link.href) ? 'bg-accent text-white' : 'text-text/90 hover:bg-surface/70'}`}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <div className="pt-1">
+                  <ConnectButton />
+                </div>
+              </li>
+            </ul>
           </div>
-
-          {/* Connect Wallet Button */}
-          <div className="flex items-center">
-            <ConnectButton />
-          </div>
-        </div>
-
-        {/* Mobile Nav */}
-        <div className="md:hidden pb-4 space-y-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(link.href)
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-300 hover:text-white hover:bg-gray-800"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        )}
       </div>
-    </nav>
+    </div>
   );
 }

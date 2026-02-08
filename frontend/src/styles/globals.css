@@ -117,3 +117,15 @@ button {
   background-color: var(--accent) !important;
 }
 
+/* PillNav specific helpers */
+.pill-nav-container {
+  pointer-events: auto;
+}
+
+.pill-link {
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+.pill-link:hover {
+  transform: translateY(-2px);
+}
+
