@@ -15,9 +15,10 @@ export function Navigation() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Launch App" },
-    { href: "/freelancer", label: "Freelancer Portal" },
-    { href: "/freelancer/retrieve", label: "Claim Funds" },
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/create", label: "Create" },
+    { href: "/freelancer", label: "FreelancePortal" },
+    { href: "/freelancer/retrieve", label: "Claim" },
     { href: "/docs", label: "Documentation" }
   ];
 
@@ -28,8 +29,15 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4">
         <nav className="flex items-center justify-between py-2">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center">
-              <span className="text-lg font-extrabold text-text">RealSlimShady</span>
+            <Link href="/" className="flex items-center" aria-label="RealSlimShady home">
+              <span
+                className="text-lg font-extrabold bg-clip-text text-transparent"
+                style={{
+                  background: 'linear-gradient(90deg, #ff1844 0%, #ff7a00 15%, #ffd500 30%, #2ecc40 45%, #00aaff 60%, #6f42c1 75%, #ff2dd4 90%)'
+                }}
+              >
+                RealSlimShady
+              </span>
             </Link>
 
             <div className="hidden md:flex items-center bg-surface/80 backdrop-blur-sm rounded-full px-2 py-1 gap-1">
