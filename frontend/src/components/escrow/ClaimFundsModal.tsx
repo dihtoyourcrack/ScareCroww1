@@ -39,67 +39,92 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
 
   // Notify MetaMask / wallet about the claim so user can see token and tx
   const notifyWallet = async (claimData: any, chainId?: string, tokenAddress?: string, tokenSymbol?: string, tokenDecimals?: number) => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') {
+      console.warn('⚠️ Window not available');
+      return;
+    }
     const eth = (window as any).ethereum;
     
     if (!eth) {
-      console.warn('MetaMask not found - ethereum provider not available');
-      return;
+      console.error('❌ MetaMask not found - ethereum provider not available. Please install MetaMask.');
+      alert('MetaMask not found. Please install MetaMask extension.');
+      throw new Error('MetaMask not available');
     }
 
     console.log('🔗 Attempting to connect MetaMask...');
 
     try {
-      // 1. Ensure accounts are available (this will prompt MetaMask to open IF not already approved)
-      console.log('📋 Requesting accounts from MetaMask...');
+      // 1. ALWAYS request accounts first - this shows the MetaMask popup if not connected
+      console.log('📋 Requesting accounts from MetaMask (POPUP SHOULD APPEAR)...');
       const accounts = await eth.request({ method: 'eth_requestAccounts' });
       console.log('✅ Accounts connected:', accounts);
 
-      // 2. Switch network - THIS WILL SHOW A POPUP
-      if (chainId) {
-        try {
-          const hex = `0x${Number(chainId).toString(16)}`;
-          console.log(`🔗 Switching to chain: ${hex} (THIS WILL SHOW A POPUP)`);
-          await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: hex }] });
-          console.log('✅ Chain switched');
-        } catch (e: any) {
-          // Network might already be the right one, or not in MetaMask
-          console.warn('Chain switch info:', e.code, e.message);
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No accounts approved in MetaMask');
+      }
+
+      // 2. Switch network - THIS WILL SHOW A POPUP if chain is not already active
+      const targetChainId = chainId || '84532'; // Default to Base Sepolia if not provided
+      const hexChainId = `0x${Number(targetChainId).toString(16)}`;
+      
+      try {
+        console.log(`🔗 Switching to chain: ${hexChainId} (${targetChainId}) - POPUP MAY APPEAR`);
+        await eth.request({ 
+          method: 'wallet_switchEthereumChain', 
+          params: [{ chainId: hexChainId }] 
+        });
+        console.log('✅ Chain switched successfully');
+      } catch (e: any) {
+        if (e.code === 4902) {
+          // Chain not in MetaMask, try to add it
+          console.log('⚠️ Chain not found, attempting to add it...');
+          throw e;
+        } else {
+          // Network switch cancelled or already on correct network
+          console.log('ℹ️ Chain switch note:', e.code, e.message);
         }
       }
 
       // 3. Watch token - THIS WILL SHOW A POPUP ASKING TO ADD TOKEN
-      if (tokenAddress && tokenAddress !== '0x0000000000000000000000000000000000000000') {
+      const targetTokenAddress = tokenAddress || '0xd9aAEc86B65D86f6A7B630E7ee46E1236544FB4D'; // Default to USDC on Base
+      const targetTokenSymbol = tokenSymbol || 'USDC';
+      const targetTokenDecimals = tokenDecimals ?? 6;
+
+      if (targetTokenAddress && targetTokenAddress !== '0x0000000000000000000000000000000000000000') {
         try {
-          console.log(`🪙 Requesting to watch token: ${tokenAddress} (THIS WILL SHOW A POPUP)`);
+          console.log(`🪙 Requesting to watch token: ${targetTokenAddress} - POPUP MAY APPEAR`);
           const watched = await eth.request({
             method: 'wallet_watchAsset',
             params: {
               type: 'ERC20',
               options: {
-                address: tokenAddress,
-                symbol: tokenSymbol || 'USDC',
-                decimals: tokenDecimals ?? 6,
+                address: targetTokenAddress,
+                symbol: targetTokenSymbol,
+                decimals: targetTokenDecimals,
               },
             },
           });
           if (watched) {
             console.log('✅ Token added to MetaMask');
+          } else {
+            console.log('ℹ️ Token watch was declined by user');
           }
         } catch (e: any) {
-          console.warn('Token watch info:', e.message);
+          console.error('❌ Token watch error:', e.message);
+          // Don't fail - user just declined to add token
         }
-      } else {
-        // No token address or native token - show a simpler notification
-        console.log('ℹ️  No ERC20 token to add (native token or no address provided)');
       }
 
       // 4. Dispatch a window event so other UI (or extension) can react
       window.dispatchEvent(new CustomEvent('escrow:claimed:wallet', { detail: claimData }));
-      console.log('✅ MetaMask integration complete');
+      console.log('✅ MetaMask integration complete - all popups processed');
     } catch (err: any) {
-      console.error('❌ MetaMask notification failed:', err.message);
-      throw err; // Re-throw so caller can handle
+      console.error('❌ MetaMask notification failed:', err);
+      // Don't re-throw for some errors, but log them clearly
+      if (err.code === 4001) {
+        console.error('User rejected the request in MetaMask');
+      }
+      throw err;
     }
   };
 
@@ -147,11 +172,15 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
 
       setStatus("processing");
 
-      // Demo-mode: simulate deposit to freelancer wallet
+      // Demo-mode: ensure MetaMask popup is shown
       if (isDemoMode()) {
         const recipient = "0x01410e514A4215c5e3a1Ee2eFc220b339BaB4b64";
-        const chainId = (escrow.destinationChainId && String(escrow.destinationChainId)) || "1";
-        const tokenAddress = escrow.tokenAddress || undefined;
+        // Use Base Sepolia (84532) as default if not specified
+        const chainId = (escrow.destinationChainId && String(escrow.destinationChainId)) || "84532";
+        // Use USDC on Base as default token
+        const tokenAddress = escrow.tokenAddress || "0xd9aAEc86B65D86f6A7B630E7ee46E1236544FB4D";
+        const tokenSymbol = escrow.tokenSymbol || 'USDC';
+        const tokenDecimals = escrow.tokenDecimals ? Number(escrow.tokenDecimals) : 6;
 
         if (!recipient) {
           alert("No freelancer address is set for this escrow.");
@@ -159,8 +188,80 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
           return;
         }
 
-        // Simulate delay
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        console.log('🎯 DEMO MODE: Processing claim with MetaMask transaction...');
+
+        // STEP 1: Request MetaMask wallet connection
+        console.log('📱 STEP 1: Opening MetaMask for wallet connection...');
+        try {
+          const eth = (window as any).ethereum;
+          if (!eth) {
+            alert('MetaMask not found. Please install MetaMask extension.');
+            setStatus("error");
+            return;
+          }
+
+          // Request accounts - this is the first popup
+          console.log('🦊 Requesting MetaMask accounts...');
+          const accounts = await eth.request({ method: 'eth_requestAccounts' });
+          console.log('✅ Accounts connected:', accounts);
+
+          if (!accounts || accounts.length === 0) {
+            alert('No MetaMask account available');
+            setStatus("error");
+            return;
+          }
+        } catch (metaMaskError: any) {
+          console.error('❌ MetaMask error:', metaMaskError);
+          if (metaMaskError.code === 4001) {
+            alert('You rejected the MetaMask connection.');
+          } else {
+            alert(`MetaMask Error: ${metaMaskError.message}`);
+          }
+          setStatus("error");
+          return;
+        }
+
+        // STEP 2: Simulate MetaMask wallet switch + token watch (these would be 2 more popups)
+        console.log('📱 STEP 2: Chain and token notifications...');
+        try {
+          const hexChainId = `0x${Number(chainId).toString(16)}`;
+          console.log(`🔗 Switching to chain: ${hexChainId}`);
+          await (window as any).ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: hexChainId }]
+          }).catch(() => {
+            // Network switch already happened or skipped, continue
+            console.log('ℹ️ Chain switch skipped or already on correct chain');
+          });
+          
+          console.log(`🪙 Adding token to wallet: ${tokenAddress}`);
+          await (window as any).ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: tokenAddress,
+                symbol: tokenSymbol,
+                decimals: tokenDecimals,
+              },
+            },
+          }).catch(() => {
+            // User rejected or already has token, continue
+            console.log('ℹ️ Token add skipped or already added');
+          });
+        } catch (e: any) {
+          console.error('⚠️ Notification error (continuing):', e.message);
+        }
+
+        // STEP 3: Simulate the actual claim transaction
+        console.log('📱 STEP 3: Processing claim transaction...');
+        
+        // Create a realistic transaction hash
+        const txHash = `0x${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`;
+        console.log('📤 Claim transaction hash:', txHash);
+
+        // Simulate network delay
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Add funds to demo wallet
         addDemoBalance(recipient, chainId, amount, tokenAddress);
@@ -173,6 +274,8 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
           claimNumber: totalInstallments - claimsRemaining + 1,
           totalInstallments,
           timestamp: new Date().toISOString(),
+          mode: 'demo',
+          txHash,
         };
         
         saveDemoLog(claimData);
@@ -184,46 +287,23 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
 
         setStatus("success");
         
-        // Create transaction hash for MetaMask notification
-        const txHash = `0x${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`;
-        
         // Show comprehensive success message
         const successMessage = 
-          `✅ Claim ${claimsRemaining === 1 ? 'Complete' : `${totalInstallments - claimsRemaining + 1} of ${totalInstallments}`}!\n\n` +
-          `Amount: ${amount} USDC\n` +
+          `✅ CLAIM SUCCESSFUL!\n\n` +
+          `Amount Claimed: ${amount} ${tokenSymbol}\n` +
           `Recipient: ${recipient.slice(0, 6)}...${recipient.slice(-4)}\n` +
-          `Transaction: ${txHash.slice(0, 10)}...${txHash.slice(-8)}\n` +
-          `Message: ${message}\n\n` +
+          `Transaction Hash: ${txHash.slice(0, 10)}...${txHash.slice(-8)}\n` +
+          `Message: ${message}\n` +
+          `Network: Base Sepolia\n\n` +
           (claimsRemaining === 1 
             ? `✓ All installments claimed. Escrow is now inactive.`
             : `\n📋 Remaining claims: ${claimsRemaining - 1} of ${totalInstallments}`
           ) +
-          `\n\n🔗 Check your MetaMask wallet for the transaction...`;
-        
-        // MetaMask wallet notification: request accounts, watch token, dispatch event
-        // Do this BEFORE showing alert so MetaMask popup isn't blocked
-        try {
-          const tokenAddr = escrow.tokenAddress || undefined;
-          const tokenSym = escrow.tokenSymbol || 'USDC';
-          const tokenDec = escrow.tokenDecimals ? Number(escrow.tokenDecimals) : 6;
-          const chainId = escrow.destinationChainId ? String(escrow.destinationChainId) : undefined;
-          
-          console.log('📱 Calling notifyWallet with:', {
-            chainId,
-            tokenAddr,
-            tokenSym,
-            tokenDec,
-            escrowData: claimData
-          });
-          
-          await notifyWallet(claimData, chainId, tokenAddr, tokenSym, tokenDec);
-          console.log('✅ Claim Successful (wallet notified)', claimData);
-        } catch (e) {
-          console.error('❌ Wallet notify error:', e);
-        }
+          `\n\n✅ Funds transferred to your wallet`;
         
         // Show alert AFTER MetaMask operations
         alert(successMessage);
+        console.log('✅ Demo claim complete:', claimData);
         
         setTimeout(() => {
           onSuccess?.();
@@ -234,22 +314,41 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
 
       // Real flow: transfer using ethers v6 and MetaMask
       try {
-        const tokenAddr = escrow.tokenAddress || undefined;
+        const tokenAddr = escrow.tokenAddress || "0xd9aAEc86B65D86f6A7B630E7ee46E1236544FB4D"; // Default USDC on Base
         const tokenSym = escrow.tokenSymbol || 'USDC';
         const tokenDec = escrow.tokenDecimals ? Number(escrow.tokenDecimals) : 6;
-        const chainId = escrow.destinationChainId ? String(escrow.destinationChainId) : undefined;
+        const chainId = escrow.destinationChainId ? String(escrow.destinationChainId) : "84532"; // Default Base Sepolia
+
+        console.log('🎯 REAL MODE: Processing claim with actual MetaMask transaction...');
 
         // Check MetaMask availability FIRST
         if (!(window as any).ethereum) {
           alert('MetaMask not found. Please install MetaMask extension.');
-          setStatus("idle");
+          setStatus("error");
           return;
         }
 
         // Step 1: Explicitly request accounts to open MetaMask if needed
-        console.log('📱 Requesting MetaMask accounts (will show popup if not connected)...');
-        const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-        console.log('✅ Accounts connected:', accounts);
+        console.log('📱 STEP 1: Requesting MetaMask accounts (POPUP SHOULD APPEAR)...');
+        let accounts: string[] = [];
+        try {
+          accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+          console.log('✅ Accounts connected:', accounts);
+        } catch (accountError: any) {
+          if (accountError.code === 4001) {
+            alert('MetaMask connection cancelled by user.');
+          } else {
+            alert(`MetaMask Error: ${accountError.message}`);
+          }
+          setStatus("error");
+          return;
+        }
+
+        if (!accounts || accounts.length === 0) {
+          alert('No accounts available in MetaMask.');
+          setStatus("error");
+          return;
+        }
 
         console.log('🔐 Creating ethers provider...');
         const provider = new ethers.BrowserProvider((window as any).ethereum);
@@ -263,8 +362,8 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
         // Use the connected wallet as the recipient (send-from-you-to-you)
         const recipient = signerAddress as `0x${string}`;
 
-        // Now notify wallet for chain switch and token watch
-        console.log('📱 Calling notifyWallet for chain switch and token watch...');
+        // Now notify wallet for chain switch and token watch (popups may appear)
+        console.log('📱 STEP 2: Chain and token notifications...');
         try {
           await notifyWallet({ 
             escrowId: escrow.id, 
@@ -274,26 +373,38 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
             timestamp: new Date().toISOString()
           }, chainId, tokenAddr, tokenSym, tokenDec);
           console.log('✅ Wallet notifications complete');
-        } catch (e) {
-          console.warn('Wallet notify warning:', e);
+        } catch (notifyError: any) {
+          console.warn('Wallet notification error (continuing anyway):', notifyError.message);
           // Don't fail, continue with transfer
         }
 
         let txHash = '';
         
-        // Always use native ETH transfer to avoid token contract issues
-        console.log('🪙 Performing ETH transfer...');
+        // Step 3: Always use native ETH transfer to avoid token contract issues
+        console.log('📱 STEP 3: Sending ETH transfer...');
         const amtBig = ethers.parseEther(amount);
         
-        const tx = await signer.sendTransaction({
-          to: recipient,
-          value: amtBig,
-        });
-        console.log('📤 Transaction sent:', tx.hash);
-        txHash = tx.hash;
-        
-        const receipt = await tx.wait();
-        console.log('✅ Transaction confirmed:', receipt?.hash);
+        try {
+          console.log('🪙 Performing ETH transfer in real mode...');
+          const tx = await signer.sendTransaction({
+            to: recipient,
+            value: amtBig,
+          });
+          console.log('📤 Transaction sent:', tx.hash);
+          txHash = tx.hash;
+          
+          console.log('⏳ Waiting for transaction confirmation...');
+          const receipt = await tx.wait();
+          console.log('✅ Transaction confirmed:', receipt?.hash);
+        } catch (txError: any) {
+          if (txError.code === 'ACTION_REJECTED') {
+            alert('Transaction was rejected in MetaMask.');
+          } else {
+            alert(`Transaction Error: ${txError.message}`);
+          }
+          setStatus("error");
+          return;
+        }
 
         // Mark installment as claimed
         const claimData = {
@@ -327,10 +438,10 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
             ? `✓ All installments claimed. Escrow is now inactive.`
             : `\n📋 Remaining claims: ${claimsRemaining - 1} of ${totalInstallments}`
           ) +
-          `\n\n🔗 View on block explorer: ${txHash}`;
+          `\n\n✅ Transaction confirmed on blockchain`;
         
         alert(successMessage);
-        console.log('✅ Claim successful:', claimData);
+        console.log('✅ Real claim successful:', claimData);
 
         setTimeout(() => {
           onSuccess?.();
@@ -351,7 +462,7 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
         setStatus("error");
       }
     } catch (e) {
-      console.error(e);
+      console.error('❌ Unexpected error:', e);
       setStatus("error");
     }
   };
