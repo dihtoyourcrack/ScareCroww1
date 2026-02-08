@@ -622,7 +622,7 @@ export default function CreateEscrowForm() {
             >
               Back
             </button>
-            {submitError?.includes("already funded") || submitError?.includes("Already funded") ? (
+            {submitError?.toLowerCase().includes("already") && submitError?.toLowerCase().includes("funded") ? (
               <button
                 type="button"
                 onClick={resetForm}
