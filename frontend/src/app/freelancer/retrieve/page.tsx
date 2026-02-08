@@ -14,7 +14,7 @@ import type { DemoEscrow } from "@/lib/demo";
 
 export default function FreelancerRetrievePage() {
   const { address, isConnected } = useAccount();
-  const { escrows, isLoading } = useAllEscrows();
+  const { escrows, isLoading } = useAllEscrows({ autoRefresh: false }); // Disabled auto-refresh to prevent 429 errors
   const [selectedEscrow, setSelectedEscrow] = useState<any | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 

@@ -11,7 +11,7 @@ import { DemoWalletBalance } from "@/components/DemoWalletBalance";
 export default function FreelancerPage() {
   const { address, isConnected } = useAccount();
   const [isMounted, setIsMounted] = useState(false);
-  const { escrows, isLoading } = useAllEscrows();
+  const { escrows, isLoading } = useAllEscrows({ autoRefresh: false }); // Disabled auto-refresh
 
   useEffect(() => {
     setIsMounted(true);
