@@ -5,8 +5,6 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 import { ReactNode } from "react";
 import PageTransition from "@/components/ui/PageTransition";
-import dynamic from 'next/dynamic';
-const TargetCursor = dynamic(() => import('@/components/ui/TargetCursor'), { ssr: false });
 import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
@@ -51,7 +49,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Navigation />
               <main className="pt-24">
                 <PageTransition>{children}</PageTransition>
-                <TargetCursor />
               </main>
             </div>
           </RainbowKitProvider>
