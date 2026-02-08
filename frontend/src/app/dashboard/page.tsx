@@ -218,7 +218,7 @@ export default function DashboardPage() {
                             View Full Details →
                           </Link>
                           <button
-                            onClick={() => setExpandedEscrow(isExpanded ? null : escrow.id)}
+                            onClick={() => setExpandedEscrow(isExpanded ? null : Number(escrow.id))}
                             className="px-4 py-2 bg-page-bg hover:bg-surface rounded-lg text-text text-sm font-semibold transition"
                           >
                             {isExpanded ? "Hide" : "Show"} Transaction Logs

@@ -45,6 +45,7 @@ function FlowingMenu({ items = [], speed = 15, textColor = '#fff', bgColor = '#0
             marqueeBgColor={marqueeBgColor}
             marqueeTextColor={marqueeTextColor}
             borderColor={borderColor}
+            userReduced={userReduced}
           />
         ))}
       </nav>
@@ -52,7 +53,7 @@ function FlowingMenu({ items = [], speed = 15, textColor = '#fff', bgColor = '#0
   );
 }
 
-function MenuItem({ link, text, image, speed, textColor, marqueeBgColor, marqueeTextColor, borderColor }: any) {
+function MenuItem({ link, text, image, speed, textColor, marqueeBgColor, marqueeTextColor, borderColor, userReduced }: any) {
   const itemRef = useRef<HTMLDivElement | null>(null);
   const marqueeRef = useRef<HTMLDivElement | null>(null);
   const marqueeInnerRef = useRef<HTMLDivElement | null>(null);

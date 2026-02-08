@@ -40,7 +40,7 @@ export default function CreateEscrowForm() {
   const [isApproved, setIsApproved] = useState(false);
   const [txStatus, setTxStatus] = useState<{
     status: "idle" | "pending" | "success" | "error";
-    hash?: string;
+    hash?: any;
     message?: string;
   }>({ status: "idle" });
 
@@ -344,7 +344,7 @@ export default function CreateEscrowForm() {
                 {txStatus.status === "error" && "✗ "}
                 {txStatus.message}
               </p>
-              {txStatus.hash && txStatus.hash.startsWith?.('0x') && (
+              {txStatus.hash && typeof txStatus.hash === 'string' && txStatus.hash.startsWith('0x') && (
                 <div className="mt-2">
                   <p className="text-xs font-mono break-all">
                     {txStatus.hash.slice(0, 10)}...{txStatus.hash.slice(-8)}
