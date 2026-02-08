@@ -128,7 +128,7 @@ export default function FreelancerRetrievePage() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-3">Retrieve Your Earnings</h1>
-          <p className="text-lg text-slate-600">
+          <p className="text-lg text-slate-600 mt-4">
             Request client-signed releases for your active escrows
           </p>
 

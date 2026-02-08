@@ -30,12 +30,10 @@ export function Navigation() {
         <nav className="flex items-center justify-between py-2">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center" aria-label="RealSlimShady home">
-              <span
-                className="text-lg font-extrabold bg-clip-text text-transparent"
-                style={{
-                  background: 'linear-gradient(90deg, #ff1844 0%, #ff7a00 15%, #ffd500 30%, #2ecc40 45%, #00aaff 60%, #6f42c1 75%, #ff2dd4 90%)'
-                }}
-              >
+              <span className="rounded-full px-3 py-1 text-sm font-extrabold text-white" style={{
+                background: 'linear-gradient(90deg, #ff1844 0%, #ff7a00 15%, #ffd500 30%, #2ecc40 45%, #00aaff 60%, #6f42c1 75%, #ff2dd4 90%)',
+                boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.06)'
+              }}>
                 RealSlimShady
               </span>
             </Link>
@@ -60,7 +58,6 @@ export function Navigation() {
 
             <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-3">
-              <Link href="/create" className="px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold hover:opacity-95 transition">Create Escrow</Link>
               <GlassSurface borderRadius={9999} style={{ padding: '4px' }}>
                 <div className="flex items-center gap-2">
                   <ConnectButton />

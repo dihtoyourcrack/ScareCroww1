@@ -81,9 +81,7 @@ export default function DocsPage() {
         {/* Content */}
         <div className="bg-black/60 backdrop-blur-sm rounded-lg p-8 border border-white/10 shadow-2xl">
           {/* Flowing menu decorative column on wide screens */}
-          <div className="hidden lg:block mb-6">
-            <FlowingMenu items={[{ link: '#', text: 'Mojave', image: 'https://picsum.photos/600/400?random=1' }, { link: '#', text: 'Sonoma', image: 'https://picsum.photos/600/400?random=2' }]} speed={12} textColor="#fff" />
-          </div>
+          {/* Decorative flowing menu removed per request (Mojave/Sonoma) */}
           {activeTab === "overview" && (
             <div className="space-y-8">
               <section>
