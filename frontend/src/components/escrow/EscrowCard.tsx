@@ -70,11 +70,11 @@ export default function EscrowCard({
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-gray-600 transition-colors">
+    <div className="bg-surface rounded-lg p-6 border border-border hover:border-accent transition-colors">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <p className="text-gray-400 text-sm">Escrow #{id}</p>
+            <p className="text-muted-text text-sm">Escrow #{id}</p>
             <span
               className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
                 status
@@ -83,16 +83,16 @@ export default function EscrowCard({
               {status}
             </span>
           </div>
-          <p className="text-white font-semibold mb-1">
+          <p className="text-text font-semibold mb-1">
             Freelancer: {freelancer?.slice(0, 6)}...{freelancer?.slice(-4)}
           </p>
-          <p className="text-2xl font-bold text-white">${formattedAmount}</p>
+          <p className="text-2xl font-bold text-text">${formattedAmount}</p>
         </div>
 
         <div className="flex flex-col gap-2">
           <Link
             href={`/escrow/${id}`}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white text-sm font-medium text-center"
+            className="accent-bg hover:opacity-90 px-4 py-2 rounded-lg text-text text-sm font-medium text-center"
           >
             View Details
           </Link>
@@ -100,7 +100,7 @@ export default function EscrowCard({
           {canDelete && !showConfirm && (
             <button
               onClick={() => setShowConfirm(true)}
-              className="bg-red-600/20 hover:bg-red-600/30 border border-red-600 px-4 py-2 rounded-lg text-red-400 text-sm font-medium"
+              className="bg-red-600/10 hover:bg-red-600/20 border border-red-600 px-4 py-2 rounded-lg text-red-400 text-sm font-medium"
             >
               Delete
             </button>
@@ -111,13 +111,13 @@ export default function EscrowCard({
               <button
                 onClick={handleDelete}
                 disabled={isCancelling}
-                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 px-4 py-2 rounded-lg text-white text-sm font-medium"
+                className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 px-4 py-2 rounded-lg text-text text-sm font-medium"
               >
                 {isCancelling ? "Deleting..." : "Confirm Delete"}
               </button>
               <button
                 onClick={() => setShowConfirm(false)}
-                className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-white text-sm"
+                className="bg-page-bg hover:bg-surface px-4 py-2 rounded-lg text-text text-sm"
               >
                 Cancel
               </button>
@@ -127,8 +127,8 @@ export default function EscrowCard({
       </div>
 
       {!funded && (
-        <div className="mt-4 pt-4 border-t border-gray-700">
-          <p className="text-yellow-400 text-sm">
+        <div className="mt-4 pt-4 border-t border-border">
+          <p className="text-warning text-sm">
             ⚠️ Not funded yet - awaiting deposit
           </p>
         </div>

@@ -67,7 +67,7 @@ export default function EscrowDetailPage() {
 
   if (!isMounted || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background text-gray-900">
+      <div className="flex items-center justify-center min-h-screen bg-page-bg text-text">
         <LoadingSpinner />
       </div>
     );
@@ -75,22 +75,22 @@ export default function EscrowDetailPage() {
 
   if (!escrow) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-card p-8 text-center border border-border max-w-md">
+      <div className="min-h-screen bg-page-bg flex items-center justify-center px-4">
+        <div className="bg-surface rounded-2xl shadow-card p-8 text-center border border-border max-w-md">
           <div className="mb-4">
-            <svg className="w-16 h-16 mx-auto text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-16 h-16 mx-auto text-muted-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <p className="text-danger mb-2 font-semibold text-lg">Escrow Not Found</p>
-          <p className="text-slate-600 mb-6 text-sm">
+          <p className="text-muted-text mb-6 text-sm">
             Escrow #{escrowId} doesn't exist yet or is still being created.
           </p>
           <div className="flex gap-3">
-            <a href="/dashboard" className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
+            <a href="/dashboard" className="flex-1 px-4 py-2 bg-page-bg text-text rounded-lg hover:bg-surface transition-colors">
               ← Dashboard
             </a>
-            <a href="/create" className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors">
+            <a href="/create" className="flex-1 px-4 py-2 accent-bg text-text rounded-lg hover:opacity-90 transition-colors">
               Create Escrow
             </a>
           </div>
@@ -166,42 +166,42 @@ export default function EscrowDetailPage() {
   const hasInstallments = Number(totalInstallments) > 0;
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-page-bg py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <a href="/dashboard" className="text-primary hover:text-primary-hover mb-4 inline-block font-medium">
+          <a href="/dashboard" className="text-accent hover:opacity-90 mb-4 inline-block font-medium">
             ← Back to Dashboard
           </a>
-          <h1 className="text-4xl font-bold mb-2 text-gray-900">Escrow #{escrowId}</h1>
-          <p className="text-muted">Secure payment management on Base Sepolia</p>
+          <h1 className="text-4xl font-bold mb-2 text-text">Escrow #{escrowId}</h1>
+          <p className="text-muted-text">Secure payment management on Base Sepolia</p>
         </div>
 
         {/* Status Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border">
-            <p className="text-muted text-sm uppercase mb-2 font-medium">Total Amount</p>
-            <p className="text-3xl font-bold text-gray-900">${formattedAmount}</p>
-            <p className="text-muted text-sm mt-1">USDC</p>
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border">
+            <p className="text-muted-text text-sm uppercase mb-2 font-medium">Total Amount</p>
+            <p className="text-3xl font-bold text-text">${formattedAmount}</p>
+            <p className="text-muted-text text-sm mt-1">USDC</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border">
-            <p className="text-muted text-sm uppercase mb-2 font-medium">Funded</p>
-            <p className={`text-2xl font-bold ${funded ? "text-success" : "text-muted"}`}>
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border">
+            <p className="text-muted-text text-sm uppercase mb-2 font-medium">Funded</p>
+            <p className={`text-2xl font-bold ${funded ? "text-success" : "text-muted-text"}`}>
               {funded ? "✓ Yes" : "✗ No"}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border">
-            <p className="text-muted text-sm uppercase mb-2 font-medium">Released</p>
-            <p className={`text-2xl font-bold ${released ? "text-success" : "text-muted"}`}>
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border">
+            <p className="text-muted-text text-sm uppercase mb-2 font-medium">Released</p>
+            <p className={`text-2xl font-bold ${released ? "text-success" : "text-muted-text"}`}>
               {released ? "✓ Yes" : "✗ No"}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border">
-            <p className="text-muted text-sm uppercase mb-2 font-medium">Status</p>
-            <p className="text-2xl font-bold text-gray-900">
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border">
+            <p className="text-muted-text text-sm uppercase mb-2 font-medium">Status</p>
+            <p className="text-2xl font-bold text-text">
               {released ? (
                 <span className="text-success">Completed</span>
               ) : refunded ? (
@@ -231,19 +231,19 @@ export default function EscrowDetailPage() {
 
         {/* Participant Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Client</h3>
-            <p className="font-mono text-sm break-all mb-3 text-muted">{client}</p>
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-text">Client</h3>
+            <p className="font-mono text-sm break-all mb-3 text-muted-text">{client}</p>
             {isClient && (
-              <div className="bg-primary-light rounded-lg px-3 py-2 inline-block border border-primary/20">
-                <p className="text-primary text-xs font-semibold">✓ Your Account</p>
+              <div className="bg-accent/10 rounded-lg px-3 py-2 inline-block border border-accent/20">
+                <p className="text-accent text-xs font-semibold">✓ Your Account</p>
               </div>
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Freelancer</h3>
-            <p className="font-mono text-sm break-all mb-3 text-muted">{freelancer}</p>
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border">
+            <h3 className="text-lg font-semibold mb-4 text-text">Freelancer</h3>
+            <p className="font-mono text-sm break-all mb-3 text-muted-text">{freelancer}</p>
             {isFreelancer && (
               <div className="bg-success/10 rounded-lg px-3 py-2 inline-block border border-success/20">
                 <p className="text-success text-xs font-semibold">✓ Your Account</p>
@@ -254,8 +254,8 @@ export default function EscrowDetailPage() {
 
         {/* Client Actions */}
         {isClient && (
-          <div className="bg-white rounded-2xl shadow-card p-8 border border-border mb-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">Client Actions</h2>
+          <div className="bg-surface rounded-2xl shadow-card p-8 border border-border mb-8">
+            <h2 className="text-2xl font-bold mb-6 text-text">Client Actions</h2>
 
             {refunded && (
               <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 mb-6">
@@ -282,13 +282,13 @@ export default function EscrowDetailPage() {
                 {/* Release with Signature */}
                 {funded && (
                   <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl p-6 border border-sky-200">
-                    <h3 className="font-semibold mb-2 text-gray-900">💳 Client-Signed Release</h3>
-                    <p className="text-sm text-slate-600 mb-4">
+                    <h3 className="font-semibold mb-2 text-text">💳 Client-Signed Release</h3>
+                    <p className="text-sm text-muted-text mb-4">
                       Sign a release authorization that allows the freelancer to claim funds on-chain
                     </p>
                     <button
                       onClick={() => setShowSignatureModal(true)}
-                      className="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
+                      className="w-full accent-bg hover:opacity-90 text-text px-6 py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg"
                     >
                       🔏 Sign Release Authorization
                     </button>
@@ -297,8 +297,8 @@ export default function EscrowDetailPage() {
 
                 {/* Release Funds */}
                 {funded && (
-                  <div className="bg-background rounded-xl p-6">
-                    <h3 className="font-semibold mb-4 text-gray-900">Release Full Payment</h3>
+                  <div className="bg-page-bg rounded-xl p-6">
+                    <h3 className="font-semibold mb-4 text-text">Release Full Payment</h3>
 
                     {releaseTxStatus.status !== "idle" && (
                       <div
@@ -343,7 +343,7 @@ export default function EscrowDetailPage() {
                         : "✓ Release $" + formattedAmount + " to Freelancer"}
                     </button>
 
-                    <p className="text-muted text-sm mt-3">
+                    <p className="text-muted-text text-sm mt-3">
                       💡 Once released, funds will be securely transferred to the freelancer's wallet on Base Sepolia
                     </p>
                   </div>
@@ -351,15 +351,15 @@ export default function EscrowDetailPage() {
 
                 {/* Bridge to Destination */}
                 {funded && (
-                  <div className="bg-background rounded-xl p-6">
-                    <h3 className="font-semibold mb-4 text-gray-900">Bridge to Destination Chain</h3>
+                  <div className="bg-page-bg rounded-xl p-6">
+                    <h3 className="font-semibold mb-4 text-text">Bridge to Destination Chain</h3>
 
                     <div className="mb-4">
-                      <label className="block text-sm text-gray-900 mb-2 font-medium">Select Destination Chain</label>
+                        <label className="block text-sm text-text mb-2 font-medium">Select Destination Chain</label>
                       <select
                         value={targetChain}
                         onChange={(e) => setTargetChain(parseInt(e.target.value))}
-                        className="w-full bg-white text-gray-900 px-4 py-3 rounded-xl border border-border focus:border-primary focus:ring-2 focus:ring-primary-light outline-none transition-all"
+                        className="w-full bg-page-bg text-text px-4 py-3 rounded-xl border border-border focus:border-accent focus:ring-2 focus:ring-accent outline-none transition-all"
                       >
                         <option value={8453}>Base</option>
                         <option value={1}>Ethereum</option>
@@ -380,8 +380,8 @@ export default function EscrowDetailPage() {
 
                 {/* Request Refund */}
                 {daysUntilRefund === 0 && (
-                  <div className="bg-background rounded-xl p-6">
-                    <h3 className="font-semibold mb-4 text-gray-900">Request Refund</h3>
+                  <div className="bg-page-bg rounded-xl p-6">
+                    <h3 className="font-semibold mb-4 text-text">Request Refund</h3>
 
                     {refundTxStatus.status !== "idle" && (
                       <div
@@ -413,7 +413,7 @@ export default function EscrowDetailPage() {
                         : "🔙 Request Refund"}
                     </button>
 
-                    <p className="text-muted text-sm mt-3">
+                    <p className="text-muted-text text-sm mt-3">
                       ⚠️ Refund deadline has passed. You can now request a refund to your wallet.
                     </p>
                   </div>
@@ -433,8 +433,8 @@ export default function EscrowDetailPage() {
 
         {/* Freelancer Status */}
         {isFreelancer && (
-          <div className="bg-white rounded-2xl shadow-card p-8 border border-border mb-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900">Your Payment Status</h2>
+          <div className="bg-surface rounded-2xl shadow-card p-8 border border-border mb-8">
+            <h2 className="text-2xl font-bold mb-6 text-text">Your Payment Status</h2>
 
             {!funded && (
               <div className="bg-warning/10 border border-warning/20 rounded-xl p-4">
@@ -457,8 +457,8 @@ export default function EscrowDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-background rounded-xl p-4">
-                  <p className="text-muted text-sm">
+                <div className="bg-page-bg rounded-xl p-4">
+                  <p className="text-muted-text text-sm">
                     💡 You can now bridge your USDC to your preferred chain using the bridge functionality.
                   </p>
                 </div>
@@ -469,8 +469,8 @@ export default function EscrowDetailPage() {
 
         {/* Generic View (not client or freelancer) */}
         {!isClient && !isFreelancer && (
-          <div className="bg-white rounded-xl shadow-card p-6 border border-border mb-8">
-            <p className="text-muted">You are viewing this escrow as a third party</p>
+          <div className="bg-surface rounded-xl shadow-card p-6 border border-border mb-8">
+            <p className="text-muted-text">You are viewing this escrow as a third party</p>
           </div>
         )}
 
