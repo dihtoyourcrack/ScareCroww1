@@ -26,8 +26,8 @@ export function Navigation() {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 pointer-events-auto">
-      <div className="max-w-7xl mx-auto px-4">
+    <div className="fixed top-0 left-0 right-0 z-50 pointer-events-auto bg-gradient-to-b from-slate-900/95 to-slate-900/80 backdrop-blur-md border-b border-accent/20">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         <nav className="flex items-center justify-between py-2">
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center bg-surface/80 backdrop-blur-sm rounded-full px-2 py-1 gap-1">
@@ -63,9 +63,12 @@ export function Navigation() {
                   </button>
                   <button
                     onClick={() => {
-                      if (confirm('Reset demo data? This will clear demo escrows and demo balances.')) {
+                      if (confirm('Reset demo data? This will clear all demo escrows and balances.')) {
                         clearDemoData();
-                        try { window.location.reload(); } catch {}
+                        // Ensure storage is written before reload
+                        setTimeout(() => {
+                          window.location.href = window.location.origin;
+                        }, 100);
                       }
                     }}
                     title="Reset demo data"

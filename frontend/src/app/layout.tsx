@@ -49,7 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <RainbowKitProvider chains={chains}>
             <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
               <Navigation />
-              <main className="pt-24">
+              <main className="pt-20">
                 <PageTransition>{children}</PageTransition>
                 <TargetCursor hideDefaultCursor parallaxOn spinDuration={1.9} hoverDuration={0.4} />
               </main>

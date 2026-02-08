@@ -23,6 +23,10 @@ export function clearDemoData(): void {
   localStorage.removeItem(DEMO_WALLET_KEY);
   localStorage.removeItem(DEMO_CLAIMED_ESCROWS_KEY);
   localStorage.removeItem(DEMO_ESCROWS_KEY);
+  // Also clear session storage and any other cached data
+  sessionStorage.clear();
+  // Reset demo mode
+  localStorage.removeItem("demo:enabled");
 }
 
 /** Toggle demo mode on/off */
