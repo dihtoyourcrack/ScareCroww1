@@ -39,7 +39,7 @@ export function Navigation() {
                     <Link
                       href={link.href}
                       className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-                        isActive(link.href) ? 'bg-accent text-white' : 'text-text/80 hover:bg-surface/60'
+                        isActive(link.href) ? 'bg-accent text-white' : 'text-white hover:bg-surface/60'
                       }`}
                     >
                       {link.label}
@@ -51,7 +51,8 @@ export function Navigation() {
           </div>
 
             <div className="flex items-center gap-3">
-            <div className="hidden sm:block">
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/create" className="px-4 py-2 rounded-full bg-accent text-white text-sm font-semibold hover:opacity-95 transition">Create Escrow</Link>
               <GlassSurface borderRadius={9999} style={{ padding: '4px' }}>
                 <div className="flex items-center gap-2">
                   <ConnectButton />
@@ -86,7 +87,7 @@ export function Navigation() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive(link.href) ? 'bg-accent text-white' : 'text-text/90 hover:bg-surface/70'}`}
+                    className={`block px-4 py-2 rounded-lg text-sm font-medium ${isActive(link.href) ? 'bg-accent text-white' : 'text-white hover:bg-surface/70'}`}
                     onClick={() => setMobileOpen(false)}
                   >
                     {link.label}
@@ -97,6 +98,9 @@ export function Navigation() {
                 <div className="pt-1">
                   <ConnectButton />
                 </div>
+              </li>
+              <li>
+                <Link href="/create" className="block mt-2 px-4 py-2 rounded-lg bg-accent text-white text-center font-semibold" onClick={() => setMobileOpen(false)}>Create Escrow</Link>
               </li>
             </ul>
           </div>
