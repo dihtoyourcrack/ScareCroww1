@@ -16,7 +16,7 @@ interface Escrow {
   deadline: number;
 }
 
-export const useAllEscrows = () => {
+export const useAllEscrows = (opts: { autoRefresh?: boolean } = { autoRefresh: true }) => {
   const [escrows, setEscrows] = useState<Escrow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [blockNumber, setBlockNumber] = useState<bigint>(0n);
@@ -33,6 +33,7 @@ export const useAllEscrows = () => {
   // Watch for new blocks to trigger refresh when escrows are updated
   useEffect(() => {
     if (!publicClient) return;
+    if (opts.autoRefresh === false) return; // skip watching when autoRefresh disabled
 
     const unwatch = publicClient.watchBlockNumber({
       onBlockNumber: (newBlockNumber) => {
@@ -44,7 +45,7 @@ export const useAllEscrows = () => {
     });
 
     return () => unwatch();
-  }, [publicClient]);
+  }, [publicClient, opts.autoRefresh]);
 
   useEffect(() => {
     const fetchAllEscrows = async () => {

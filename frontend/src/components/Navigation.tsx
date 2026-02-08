@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import GlassSurface from '@/components/ui/GlassSurface';
 import { useState } from "react";
 import useReducedMotion from '@/hooks/useReducedMotion';
+import { clearDemoData } from '@/lib/demo';
 
 export function Navigation() {
   const pathname = usePathname() || "/";
@@ -68,6 +69,18 @@ export function Navigation() {
                     className={`ml-2 px-3 py-1 rounded-full text-sm font-medium transition ${reducedMotion ? 'bg-page-bg text-muted-text' : 'bg-accent text-white'}`}
                   >
                     {reducedMotion ? 'Motion Off' : 'Motion On'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Reset demo data? This will clear demo escrows and demo balances.')) {
+                        clearDemoData();
+                        try { window.location.reload(); } catch {}
+                      }
+                    }}
+                    title="Reset demo data"
+                    className="ml-2 px-3 py-1 rounded-full text-sm font-medium bg-red-600 text-white hover:opacity-90 transition"
+                  >
+                    Reset Data
                   </button>
                 </div>
               </GlassSurface>

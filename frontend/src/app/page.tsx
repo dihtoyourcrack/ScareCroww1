@@ -71,18 +71,9 @@ export default function Home() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
-        {/* Text Pressure Header */}
-        <div className="mb-12" style={{ height: '200px' }}>
-          <TextPressure
-            text="RealSlimShady"
-            textColor="transparent"
-            className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]"
-            minFontSize={40}
-            weight={true}
-            width={true}
-            italic={true}
-            flex={true}
-          />
+        {/* Title Header (removed decorative vibgyor TextPressure per request) */}
+        <div className="mb-12" style={{ height: '120px' }}>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">RealSlimShady</h1>
         </div>
 
         {/* Blur Text Subtitle */}
@@ -210,10 +201,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Circular Gallery (lazy, desktop only) */}
-      <div className="hidden lg:block absolute right-8 top-40 z-10 w-[480px] h-[480px] pointer-events-none">
-        <CircularGallery />
-      </div>
+      {/* Decorative gallery removed per request (bridge/trees/desk images removed) */}
 
       <style jsx>{`
         @keyframes pulse {

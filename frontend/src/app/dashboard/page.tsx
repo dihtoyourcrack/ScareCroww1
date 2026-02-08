@@ -13,7 +13,7 @@ export default function DashboardPage() {
   const { address, isConnected } = useAccount();
   const [isMounted, setIsMounted] = useState(false);
   const [expandedEscrow, setExpandedEscrow] = useState<number | null>(null);
-  const { escrows, isLoading } = useAllEscrows();
+  const { escrows, isLoading } = useAllEscrows({ autoRefresh: false });
 
   useEffect(() => {
     setIsMounted(true);
