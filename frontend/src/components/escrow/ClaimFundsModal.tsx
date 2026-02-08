@@ -172,9 +172,9 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
 
       setStatus("processing");
 
-      // Demo-mode: ensure MetaMask popup is shown
+      // Demo-mode: ensure MetaMask transaction popup is shown
       if (isDemoMode()) {
-        const recipient = "0x01410e514A4215c5e3a1Ee2eFc220b339BaB4b64";
+        const recipient = address || "0x01410e514A4215c5e3a1Ee2eFc220b339BaB4b64";
         // Use Base Sepolia (84532) as default if not specified
         const chainId = (escrow.destinationChainId && String(escrow.destinationChainId)) || "84532";
         // Use USDC on Base as default token
@@ -182,26 +182,19 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
         const tokenSymbol = escrow.tokenSymbol || 'USDC';
         const tokenDecimals = escrow.tokenDecimals ? Number(escrow.tokenDecimals) : 6;
 
-        if (!recipient) {
-          alert("No freelancer address is set for this escrow.");
+        console.log('🎯 DEMO MODE: Processing claim with MetaMask transaction...');
+
+        // STEP 1: Check MetaMask availability
+        const eth = (window as any).ethereum;
+        if (!eth) {
+          alert('MetaMask not found. Please install MetaMask extension.');
           setStatus("error");
           return;
         }
 
-        console.log('🎯 DEMO MODE: Processing claim with MetaMask transaction...');
-
-        // STEP 1: Request MetaMask wallet connection
-        console.log('📱 STEP 1: Opening MetaMask for wallet connection...');
         try {
-          const eth = (window as any).ethereum;
-          if (!eth) {
-            alert('MetaMask not found. Please install MetaMask extension.');
-            setStatus("error");
-            return;
-          }
-
-          // Request accounts - this is the first popup
-          console.log('🦊 Requesting MetaMask accounts...');
+          // STEP 2: Request accounts - this is MetaMask popup #1
+          console.log('📱 STEP 1: Opening MetaMask to connect wallet...');
           const accounts = await eth.request({ method: 'eth_requestAccounts' });
           console.log('✅ Accounts connected:', accounts);
 
@@ -210,106 +203,137 @@ export default function ClaimFundsModal({ isOpen, onClose, escrow, remainingBala
             setStatus("error");
             return;
           }
+
+          // Use connected account as recipient
+          const connectedAddress = accounts[0];
+
+          // STEP 3: Switch to correct chain
+          console.log('📱 STEP 2: Switching to Base Sepolia...');
+          const hexChainId = `0x${Number(chainId).toString(16)}`;
+          try {
+            await eth.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: hexChainId }]
+            });
+            console.log('✅ Chain switched');
+          } catch (switchError: any) {
+            if (switchError.code !== 4902) {
+              console.log('ℹ️ Chain already correct or switch skipped');
+            }
+          }
+
+          // STEP 4: Send transaction directly via eth_sendTransaction
+          // This will ALWAYS show the MetaMask transaction popup, even in demo mode
+          console.log('📱 STEP 3: Sending claim transaction (MetaMask popup should appear)...');
+          
+          // Convert amount to Wei (1 ETH = 10^18 Wei)
+          const amountInWei = ethers.parseEther(amount);
+          const amountHex = '0x' + amountInWei.toString(16);
+          
+          console.log('💰 Amount to transfer:', amount, 'ETH');
+          console.log('💰 Amount in Wei:', amountInWei.toString());
+          console.log('💰 Amount in Hex:', amountHex);
+          console.log('📤 Sending to:', connectedAddress);
+          
+          // Create transaction object for MetaMask
+          const txObject = {
+            from: connectedAddress,
+            to: connectedAddress,
+            value: amountHex,
+            gas: '0x5208', // 21000 gas for standard transfer
+          };
+          
+          console.log('📋 Transaction object:', txObject);
+          
+          let txHash = '';
+          try {
+            // This is the call that shows the MetaMask popup
+            console.log('🦊 Requesting eth_sendTransaction (MetaMask popup #3 should appear)...');
+            txHash = await eth.request({
+              method: 'eth_sendTransaction',
+              params: [txObject],
+            });
+            console.log('✅ Transaction hash returned:', txHash);
+          } catch (txError: any) {
+            console.error('❌ Transaction error:', txError);
+            if (txError.code === 4001) {
+              alert('You rejected the transaction in MetaMask.');
+            } else if (txError.message?.includes('insufficient')) {
+              alert('Insufficient balance in MetaMask wallet.');
+            } else {
+              alert(`Transaction Error: ${txError.message || 'Unknown error'}`);
+            }
+            setStatus("error");
+            return;
+          }
+          
+          console.log('📤 Transaction sent to MetaMask:', txHash);
+
+          // STEP 5: Wait a moment then add funds to demo wallet
+          console.log('⏳ Processing claim...');
+          await new Promise(resolve => setTimeout(resolve, 1500));
+
+          // Add funds to demo wallet
+          addDemoBalance(connectedAddress, chainId, amount, tokenAddress);
+
+          // Mark installment as claimed
+          const claimData = {
+            escrowId: escrow.id,
+            amount,
+            message,
+            claimNumber: totalInstallments - claimsRemaining + 1,
+            totalInstallments,
+            timestamp: new Date().toISOString(),
+            mode: 'demo',
+            txHash,
+            address: connectedAddress,
+          };
+          
+          saveDemoLog(claimData);
+
+          // Mark escrow as claimed only if all installments are claimed
+          if (claimsRemaining === 1) {
+            markEscrowAsClaimed(String(escrow.id || escrow.escrowId || escrow.id));
+          }
+
+          setStatus("success");
+          
+          // Show comprehensive success message
+          const successMessage = 
+            `✅ CLAIM SUCCESSFUL!\n\n` +
+            `Amount Claimed: ${amount} ETH\n` +
+            `Recipient: ${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-4)}\n` +
+            `Transaction Hash: ${txHash.slice(0, 10)}...${txHash.slice(-8)}\n` +
+            `Message: ${message}\n` +
+            `Network: Base Sepolia\n\n` +
+            (claimsRemaining === 1 
+              ? `✓ All installments claimed. Escrow is now inactive.`
+              : `\n📋 Remaining claims: ${claimsRemaining - 1} of ${totalInstallments}`
+            ) +
+            `\n\n✅ Funds transferred to your wallet`;
+          
+          alert(successMessage);
+          console.log('✅ Demo claim complete:', claimData);
+          
+          setTimeout(() => {
+            onSuccess?.();
+            onClose();
+          }, 900);
+          return;
+          
         } catch (metaMaskError: any) {
           console.error('❌ MetaMask error:', metaMaskError);
+          
           if (metaMaskError.code === 4001) {
-            alert('You rejected the MetaMask connection.');
+            alert('You rejected the transaction in MetaMask.');
+          } else if (metaMaskError.message?.includes('insufficient funds')) {
+            alert('Insufficient balance in MetaMask wallet for this transaction.');
           } else {
-            alert(`MetaMask Error: ${metaMaskError.message}`);
+            alert(`MetaMask Error: ${metaMaskError.message || 'Unknown error'}`);
           }
           setStatus("error");
           return;
         }
-
-        // STEP 2: Simulate MetaMask wallet switch + token watch (these would be 2 more popups)
-        console.log('📱 STEP 2: Chain and token notifications...');
-        try {
-          const hexChainId = `0x${Number(chainId).toString(16)}`;
-          console.log(`🔗 Switching to chain: ${hexChainId}`);
-          await (window as any).ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: hexChainId }]
-          }).catch(() => {
-            // Network switch already happened or skipped, continue
-            console.log('ℹ️ Chain switch skipped or already on correct chain');
-          });
-          
-          console.log(`🪙 Adding token to wallet: ${tokenAddress}`);
-          await (window as any).ethereum.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: tokenAddress,
-                symbol: tokenSymbol,
-                decimals: tokenDecimals,
-              },
-            },
-          }).catch(() => {
-            // User rejected or already has token, continue
-            console.log('ℹ️ Token add skipped or already added');
-          });
-        } catch (e: any) {
-          console.error('⚠️ Notification error (continuing):', e.message);
-        }
-
-        // STEP 3: Simulate the actual claim transaction
-        console.log('📱 STEP 3: Processing claim transaction...');
-        
-        // Create a realistic transaction hash
-        const txHash = `0x${Math.random().toString(16).slice(2)}${Math.random().toString(16).slice(2)}`;
-        console.log('📤 Claim transaction hash:', txHash);
-
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        // Add funds to demo wallet
-        addDemoBalance(recipient, chainId, amount, tokenAddress);
-
-        // Mark installment as claimed
-        const claimData = {
-          escrowId: escrow.id,
-          amount,
-          message,
-          claimNumber: totalInstallments - claimsRemaining + 1,
-          totalInstallments,
-          timestamp: new Date().toISOString(),
-          mode: 'demo',
-          txHash,
-        };
-        
-        saveDemoLog(claimData);
-
-        // Mark escrow as claimed only if all installments are claimed
-        if (claimsRemaining === 1) {
-          markEscrowAsClaimed(String(escrow.id || escrow.escrowId || escrow.id));
-        }
-
-        setStatus("success");
-        
-        // Show comprehensive success message
-        const successMessage = 
-          `✅ CLAIM SUCCESSFUL!\n\n` +
-          `Amount Claimed: ${amount} ${tokenSymbol}\n` +
-          `Recipient: ${recipient.slice(0, 6)}...${recipient.slice(-4)}\n` +
-          `Transaction Hash: ${txHash.slice(0, 10)}...${txHash.slice(-8)}\n` +
-          `Message: ${message}\n` +
-          `Network: Base Sepolia\n\n` +
-          (claimsRemaining === 1 
-            ? `✓ All installments claimed. Escrow is now inactive.`
-            : `\n📋 Remaining claims: ${claimsRemaining - 1} of ${totalInstallments}`
-          ) +
-          `\n\n✅ Funds transferred to your wallet`;
-        
-        // Show alert AFTER MetaMask operations
-        alert(successMessage);
-        console.log('✅ Demo claim complete:', claimData);
-        
-        setTimeout(() => {
-          onSuccess?.();
-          onClose();
-        }, 900);
-        return;
       }
 
       // Real flow: transfer using ethers v6 and MetaMask
