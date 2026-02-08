@@ -1,6 +1,7 @@
-import { run } from "hardhat";
-
 async function main() {
+  const hardhat = await import("hardhat");
+  const { run } = hardhat as any;
+
   const contractAddress = process.env.CONTRACT_ADDRESS;
   const usdcAddress = process.env.USDC_ADDRESS;
 
