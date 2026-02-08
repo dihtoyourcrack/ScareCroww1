@@ -35,7 +35,7 @@ export function useCreateEscrow() {
 }
 
 export function useDepositFunds() {
-  const { write, isLoading, isError, error } = useContractWrite({
+  const { data: hash, write, isLoading, isError, error } = useContractWrite({
     address: ESCROW_ADDRESS,
     abi: ESCROW_ABI,
     functionName: "depositFunds",
@@ -43,6 +43,7 @@ export function useDepositFunds() {
 
   return {
     depositFunds: write,
+    hash,
     isLoading,
     isError,
     error,
@@ -277,5 +278,19 @@ export function useReleaseWithSignature() {
     isError,
     error,
     signError,
+  };
+}
+
+// Hook to get the current escrow count
+export function useEscrowCount() {
+  const { data: count } = useContractRead({
+    address: ESCROW_ADDRESS,
+    abi: ESCROW_ABI,
+    functionName: "escrowCount",
+    watch: true,
+  });
+
+  return {
+    escrowCount: count ? Number(count) : 0,
   };
 }

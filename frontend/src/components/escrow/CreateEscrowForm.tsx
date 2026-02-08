@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useCreateEscrow, useCreateEscrowWithInstallments, useDepositFunds, useTokenApproval } from "@/hooks/useEscrowContract";
+import { useCreateEscrow, useCreateEscrowWithInstallments, useDepositFunds, useTokenApproval, useEscrowCount } from "@/hooks/useEscrowContract";
 import { useENS } from "@/hooks/useENS";
 import { uploadToIPFS, uploadToLocalStorage } from "@/lib/ipfs";
 import { ESCROW_ADDRESS } from "@/lib/contracts";
@@ -46,9 +46,11 @@ export default function CreateEscrowForm() {
 
   const { createEscrow, isLoading: isCreating, error: createError, hash: createHash } = useCreateEscrow();
   const { createEscrowWithInstallments, isLoading: isCreatingWithInstallments, hash: createWithInstallmentsHash } = useCreateEscrowWithInstallments();
-  const { depositFunds, isLoading: isDepositing, error: depositError } = useDepositFunds();
+  const { depositFunds, isLoading: isDepositing, error: depositError, hash: depositHash } = useDepositFunds();
   const { approve, isLoading: isApproving, hash: approveHash } = useTokenApproval(token.address as `0x${string}`);
   const { resolve } = useENS();
+  const { escrowCount } = useEscrowCount();
+  const [previousEscrowCount, setPreviousEscrowCount] = useState<number | null>(null);
 
   // Watch for transaction hash and update status
   useEffect(() => {
@@ -59,10 +61,23 @@ export default function CreateEscrowForm() {
         hash: txHash,
         message: "✅ Escrow creation transaction submitted!",
       });
-      // Set a temporary escrow ID - in production, parse this from events
-      setEscrowId("0");
+      // Save current escrow count to detect the new escrow ID when it's incremented
+      setPreviousEscrowCount(escrowCount);
     }
-  }, [createHash, createWithInstallmentsHash]);
+  }, [createHash, createWithInstallmentsHash, escrowCount]);
+
+  // Watch for escrow count change - when it increases, we know a new escrow was created
+  useEffect(() => {
+    if (previousEscrowCount !== null && escrowCount > previousEscrowCount) {
+      // The newly created escrow has ID = previousEscrowCount (since IDs start at 0)
+      const newEscrowId = String(previousEscrowCount);
+      console.log(`✓ New escrow created with ID: ${newEscrowId}`);
+      setEscrowId(newEscrowId);
+      setStep("deposit");
+      // Reset for next escrow
+      setPreviousEscrowCount(null);
+    }
+  }, [escrowCount, previousEscrowCount]);
 
   // Watch for loading state
   useEffect(() => {
@@ -129,6 +144,22 @@ export default function CreateEscrowForm() {
     }
   }, [escrowId, isCreating, step]);
 
+  // Watch for successful deposit
+  useEffect(() => {
+    if (depositHash) {
+      console.log("✅ Deposit successful with hash:", depositHash);
+      setTxStatus({
+        status: "success",
+        hash: depositHash,
+        message: `✅ Funds deposited successfully! ID: ${escrowId}`,
+      });
+      // Auto-reset form after 2 seconds to allow user to see the message
+      setTimeout(() => {
+        resetForm();
+      }, 2000);
+    }
+  }, [depositHash, escrowId]);
+
   const resetForm = () => {
     setFreelancerInput("");
     setFreelancerAddress("");
@@ -141,6 +172,7 @@ export default function CreateEscrowForm() {
     setMessageCID(null);
     setIsApproved(false);
     setTxStatus({ status: "idle" });
+    setPreviousEscrowCount(null);
   };
 
   const handleResolveENS = async () => {
