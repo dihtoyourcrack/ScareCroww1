@@ -6,6 +6,9 @@ import ScrollVelocity from "@/components/ui/ScrollVelocity";
 import BlurText from "@/components/ui/BlurText";
 import TextPressure from "@/components/ui/TextPressure";
 import Prism from "@/components/ui/Prism";
+import dynamic from 'next/dynamic';
+
+const CircularGallery = dynamic(() => import('@/components/ui/CircularGallery'), { ssr: false });
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
@@ -205,6 +208,11 @@ export default function Home() {
             Connect Wallet & Launch
           </Link>
         </div>
+      </div>
+
+      {/* Circular Gallery (lazy, desktop only) */}
+      <div className="hidden lg:block absolute right-8 top-40 z-10 w-[480px] h-[480px] pointer-events-none">
+        <CircularGallery />
       </div>
 
       <style jsx>{`
