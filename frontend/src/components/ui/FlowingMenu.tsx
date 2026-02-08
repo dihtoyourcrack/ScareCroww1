@@ -2,19 +2,21 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
+import useReducedMotion from '@/hooks/useReducedMotion';
 
 import './FlowingMenu.css';
 
 function FlowingMenu({ items = [], speed = 15, textColor = '#fff', bgColor = '#060010', marqueeBgColor = '#fff', marqueeTextColor = '#060010', borderColor = '#fff' }: any) {
   const [reduced, setReduced] = useState(false);
+  const [userReduced] = useReducedMotion();
 
   useEffect(() => {
     const mq = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
-    const onChange = () => setReduced(!!(mq && mq.matches));
+    const onChange = () => setReduced(!!(mq && mq.matches) || !!(typeof document !== 'undefined' && document.documentElement.classList.contains('reduced-motion')) || !!userReduced);
     onChange();
     mq?.addEventListener?.('change', onChange);
     return () => mq?.removeEventListener?.('change', onChange);
-  }, []);
+  }, [userReduced]);
 
   if (reduced) {
     // Reduced-motion fallback: static list without marquee animations
@@ -87,7 +89,8 @@ function MenuItem({ link, text, image, speed, textColor, marqueeBgColor, marquee
 
       // Only initialize GSAP animation when present and user hasn't requested reduced motion
       const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!prefersReduced) {
+      const manualReduced = typeof document !== 'undefined' && document.documentElement.classList.contains('reduced-motion');
+      if (!prefersReduced && !manualReduced && !userReduced) {
         animationRef.current = gsap.to(marqueeInnerRef.current, { x: -contentWidth, duration: speed, ease: 'none', repeat: -1 });
       }
     };

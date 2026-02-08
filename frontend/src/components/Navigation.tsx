@@ -6,10 +6,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import dynamic from 'next/dynamic';
 import GlassSurface from '@/components/ui/GlassSurface';
 import { useState } from "react";
+import useReducedMotion from '@/hooks/useReducedMotion';
 
 export function Navigation() {
   const pathname = usePathname() || "/";
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [reducedMotion, setReducedMotion] = useReducedMotion();
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -51,7 +53,17 @@ export function Navigation() {
             <div className="flex items-center gap-3">
             <div className="hidden sm:block">
               <GlassSurface borderRadius={9999} style={{ padding: '4px' }}>
-                <ConnectButton />
+                <div className="flex items-center gap-2">
+                  <ConnectButton />
+                  <button
+                    aria-pressed={reducedMotion}
+                    title={reducedMotion ? "Animations disabled" : "Disable animations"}
+                    onClick={() => setReducedMotion(!reducedMotion)}
+                    className={`ml-2 px-3 py-1 rounded-full text-sm font-medium transition ${reducedMotion ? 'bg-page-bg text-muted-text' : 'bg-accent text-white'}`}
+                  >
+                    {reducedMotion ? 'Motion Off' : 'Motion On'}
+                  </button>
+                </div>
               </GlassSurface>
             </div>
 

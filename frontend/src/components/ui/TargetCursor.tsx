@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import useReducedMotion from '@/hooks/useReducedMotion';
 
 export default function TargetCursor({
   spinDuration = 2,
@@ -12,11 +13,12 @@ export default function TargetCursor({
   const dotRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const [enabled, setEnabled] = useState(false);
+  const [reducedMotion] = useReducedMotion();
 
   useEffect(() => {
     const hasTouch = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
     const prefersReduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (hasTouch || prefersReduced) return; // disable on touch devices or when user prefers reduced motion
+    if (hasTouch || prefersReduced || reducedMotion) return; // disable on touch devices or when user prefers reduced motion or toggled off
     setEnabled(true);
   }, []);
 

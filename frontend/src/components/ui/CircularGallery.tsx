@@ -2,6 +2,7 @@
 
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
 import { useEffect, useRef, useState } from 'react';
+import useReducedMotion from '@/hooks/useReducedMotion';
 
 import './CircularGallery.css';
 
@@ -394,12 +395,14 @@ class App {
 export default function CircularGallery({ items, bend = 3, textColor = '#ffffff', borderRadius = 0.05, font = 'bold 30px Figtree', scrollSpeed = 2, scrollEase = 0.05 }: any) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [shouldRender, setShouldRender] = useState(true);
+  const [userReduced] = useReducedMotion();
 
   useEffect(() => {
     if (!containerRef.current) return;
     const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const manualReduced = typeof document !== 'undefined' && document.documentElement.classList.contains('reduced-motion');
     const smallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
-    if (prefersReduced || smallScreen) {
+    if (prefersReduced || manualReduced || userReduced || smallScreen) {
       setShouldRender(false);
       return;
     }
