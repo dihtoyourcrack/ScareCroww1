@@ -129,3 +129,31 @@ button {
   transform: translateY(-2px);
 }
 
+/* Accessibility: focus-visible and reduced-motion defaults */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Hide decorative cursor and heavy visuals when reduced motion is requested */
+  .target-cursor-wrapper {
+    display: none !important;
+  }
+
+  .scroller, .marquee__inner, .circular-gallery canvas {
+    will-change: auto !important;
+  }
+}
+

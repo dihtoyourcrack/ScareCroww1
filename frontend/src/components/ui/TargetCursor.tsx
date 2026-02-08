@@ -15,7 +15,8 @@ export default function TargetCursor({
 
   useEffect(() => {
     const hasTouch = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-    if (hasTouch) return; // disable on touch devices
+    const prefersReduced = typeof window !== "undefined" && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (hasTouch || prefersReduced) return; // disable on touch devices or when user prefers reduced motion
     setEnabled(true);
   }, []);
 

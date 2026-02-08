@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, Mesh, Plane, Program, Renderer, Texture, Transform } from 'ogl';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import './CircularGallery.css';
 
@@ -393,12 +393,30 @@ class App {
 
 export default function CircularGallery({ items, bend = 3, textColor = '#ffffff', borderRadius = 0.05, font = 'bold 30px Figtree', scrollSpeed = 2, scrollEase = 0.05 }: any) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [shouldRender, setShouldRender] = useState(true);
+
   useEffect(() => {
     if (!containerRef.current) return;
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const smallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
+    if (prefersReduced || smallScreen) {
+      setShouldRender(false);
+      return;
+    }
+
     const app = new App(containerRef.current, { items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase });
     return () => {
       app.destroy();
     };
   }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase]);
+
+  if (!shouldRender) {
+    return (
+      <div className="circular-gallery-fallback" ref={containerRef} aria-hidden={true} style={{ width: '100%', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p className="text-muted-text">Decorative gallery disabled to preserve accessibility and performance.</p>
+      </div>
+    );
+  }
+
   return <div className="circular-gallery" ref={containerRef} style={{ width: '100%', height: '400px' }} />;
 }

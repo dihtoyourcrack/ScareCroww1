@@ -6,6 +6,31 @@ import { gsap } from 'gsap';
 import './FlowingMenu.css';
 
 function FlowingMenu({ items = [], speed = 15, textColor = '#fff', bgColor = '#060010', marqueeBgColor = '#fff', marqueeTextColor = '#060010', borderColor = '#fff' }: any) {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    const mq = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    const onChange = () => setReduced(!!(mq && mq.matches));
+    onChange();
+    mq?.addEventListener?.('change', onChange);
+    return () => mq?.removeEventListener?.('change', onChange);
+  }, []);
+
+  if (reduced) {
+    // Reduced-motion fallback: static list without marquee animations
+    return (
+      <div className="menu-wrap" style={{ backgroundColor: bgColor }} aria-hidden={false}>
+        <nav className="menu">
+          {items.map((item: any, idx: number) => (
+            <div className="menu__item" key={idx} style={{ borderColor }}>
+              <a href={item.link} className="menu__item-link" style={{ color: textColor }}>{item.text}</a>
+            </div>
+          ))}
+        </nav>
+      </div>
+    );
+  }
+
   return (
     <div className="menu-wrap" style={{ backgroundColor: bgColor }}>
       <nav className="menu">
@@ -60,7 +85,11 @@ function MenuItem({ link, text, image, speed, textColor, marqueeBgColor, marquee
         animationRef.current.kill();
       }
 
-      animationRef.current = gsap.to(marqueeInnerRef.current, { x: -contentWidth, duration: speed, ease: 'none', repeat: -1 });
+      // Only initialize GSAP animation when present and user hasn't requested reduced motion
+      const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!prefersReduced) {
+        animationRef.current = gsap.to(marqueeInnerRef.current, { x: -contentWidth, duration: speed, ease: 'none', repeat: -1 });
+      }
     };
 
     const timer = setTimeout(setupMarquee, 50);
