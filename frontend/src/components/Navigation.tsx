@@ -30,15 +30,6 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4">
         <nav className="flex items-center justify-between py-2">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center" aria-label="RealSlimShady home">
-              <span className="rounded-full px-3 py-1 text-sm font-extrabold text-white" style={{
-                background: 'linear-gradient(90deg, #ff1844 0%, #ff7a00 15%, #ffd500 30%, #2ecc40 45%, #00aaff 60%, #6f42c1 75%, #ff2dd4 90%)',
-                boxShadow: 'inset 0 0 0 2px rgba(255,255,255,0.06)'
-              }}>
-                RealSlimShady
-              </span>
-            </Link>
-
             <div className="hidden md:flex items-center bg-surface/80 backdrop-blur-sm rounded-full px-2 py-1 gap-1">
               <ul className="flex items-center gap-1">{
                 navLinks.map((link) => (

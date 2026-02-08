@@ -6,6 +6,7 @@ import ScrollVelocity from "@/components/ui/ScrollVelocity";
 import BlurText from "@/components/ui/BlurText";
 import TextPressure from "@/components/ui/TextPressure";
 import Prism from "@/components/ui/Prism";
+import Shuffle from "@/components/ui/Shuffle";
 import dynamic from 'next/dynamic';
 
 const CircularGallery = dynamic(() => import('@/components/ui/CircularGallery'), { ssr: false });
@@ -71,9 +72,9 @@ export default function Home() {
 
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
-        {/* Title Header (removed decorative vibgyor TextPressure per request) */}
-        <div className="mb-12" style={{ height: '120px' }}>
-          <h1 className="text-4xl md:text-5xl font-bold text-white">RealSlimShady</h1>
+        {/* Title Header: Character-by-character Shuffle animation */}
+        <div className="mb-12 flex justify-center items-center" style={{ height: '120px' }}>
+          {isMounted && <Shuffle text="RealSlimShady" shuffleDirection="right" duration={0.35} stagger={0.03} triggerOnce={true} triggerOnScroll={true} respectReducedMotion={true} />}
         </div>
 
         {/* Blur Text Subtitle */}
